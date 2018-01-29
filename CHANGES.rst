@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.0.14b3 (2018-01-29)
+---------------------
+- Development moved to github.
+- General improvements and update.
+
 1.0.14b2 (2017-01-01)
 ---------------------
 - Second beta release.
