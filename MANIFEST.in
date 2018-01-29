@@ -1,0 +1,22 @@
+include README.rst
+include CHANGES.rst
+include LICENSE
+include tox.ini
+
+graft src
+exclude src/jt/javabridge/_java/class2py.py
+#exclude src/jt/javabridge/jutil.py
+#exclude src/jt/javabridge/wrappers.py
+#prune   src/jt/javabridge/_platform
+#prune   src/jt/javabridge/_java/org/cellprofiler/javabridge
+#prune   src/jt/javabridge/_java/org/cellprofiler/runnablequeue
+
+graft docs
+prune docs/_build
+
+graft demo
+
+graft tests
+
+global-exclude .build .build.*
+global-exclude *.py[co] __pycache__
