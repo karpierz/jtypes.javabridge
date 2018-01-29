@@ -38,7 +38,6 @@ Prerequisites:
 + Python 2.7 or higher or 3.3 or higher
 
   * http://www.python.org/
-  * Versions lower than 2.7 or lower than 3.3 WON'T WORK.
   * 2.7 and 3.4 are primary test environments.
 
 + pip and setuptools
@@ -46,18 +45,39 @@ Prerequisites:
   * http://pypi.python.org/pypi/pip
   * http://pypi.python.org/pypi/setuptools
 
-To install run ::
+To install run::
 
     python -m pip install --upgrade jtypes.javabridge
 
-To ensure everything is running correctly you can run the tests using ::
+To ensure everything is running correctly you can run the tests using::
 
     python -m jt.javabridge.tests
+
+Development
+===========
+
+Visit `development page <https://github.com/karpierz/jtypes.javabridge>`__
+
+Installation from sources:
+
+Clone the `sources <https://github.com/karpierz/jtypes.javabridge>`__ and run::
+
+    python -m pip install ./jtypes.javabridge
+
+or on development mode::
+
+    python -m pip install --editable ./jtypes.javabridge
+
+Prerequisites:
+
++ Development is strictly based on *tox*. To install it run::
+
+    python -m pip install tox
 
 License
 =======
 
-  | Copyright (c) 2014-2017, Adam Karpierz
+  | Copyright (c) 2014-2018, Adam Karpierz
   |
   | Licensed under the BSD license
   | http://opensource.org/licenses/BSD-3-Clause
