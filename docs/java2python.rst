@@ -1,7 +1,7 @@
 Calling Python from Java
 ========================
 
-The jtypes.javabridge loads a Java class, org.cellprofiler.javabridge.CPython,
+The *jtypes.javabridge* loads a Java class, org.cellprofiler.javabridge.CPython,
 that can be used to execute Python code. The class can be used within Java code
 called from the Python interpreter or it can be used within Java to run Python
 embedded in Java.
@@ -61,8 +61,8 @@ embedded in Java.
     .. js:function:: execute
     
          ``execute`` is a synonym for ``exec`` which is a Python keyword.
-         Use ``execute`` in place of ``exec`` to call Python from a jt.javabridge
-         CWrapper for CPython.
+         Use ``execute`` in place of ``exec`` to call Python from a
+         *jtypes.javabridge* CWrapper for CPython.
             
 Maintaing references to Python values
 -------------------------------------
@@ -95,5 +95,3 @@ Example::
 .. autofunction:: jt.javabridge.redeem_jref
 .. autofunction:: jt.javabridge.lock_jref
 .. autofunction:: jt.javabridge.unlock_jref
-
-    

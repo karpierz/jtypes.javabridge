@@ -8,12 +8,14 @@ Python wrapper for the Java Native Interface.
 Overview
 ========
 
-  | jtypes.javabridge is a bridge between Python and Java, allowing these to intercommunicate.
+  | **jtypes.javabridge** is a bridge between Python and Java, allowing these to intercommunicate.
   | It is an effort to allow python programs full access to Java class libraries.
-  | 
-  | jtypes.javabridge is a lightweight Python package, based on the *ctypes* or *cffi* library.
+
+  `PyPI record <https://pypi.python.org/pypi/jtypes.javabridge>`__.
+
+  | **jtypes.javabridge** is a lightweight Python package, based on the *ctypes* or *cffi* library.
   | It is an almost fully compliant implementation of Lee Kamentsky's and Vebjorn Ljosa's
-    *Javabridge* package by reimplementing whole its functionality in a clean Python instead of
+    **Javabridge** package by reimplementing whole its functionality in a clean Python instead of
     Cython and C.
 
 About javabridge:
@@ -21,24 +23,25 @@ About javabridge:
 
 Borrowed from the `original website <http://pythonhosted.org/javabridge/>`__:
 
-  | The javabridge Python package makes it easy to start a Java virtual
+  | The **javabridge** Python package makes it easy to start a Java virtual
     machine (JVM) from Python and interact with it. Python code can interact
     with the JVM using a low-level API or a more convenient high-level API.
 
 Requirements
 ============
 
-- Java Runtime (JRE) or Java Development Kit (JDK), and NumPy.
+- Java Runtime (JRE) or Java Development Kit (JDK), and NumPy (not mandatory but highly
+  recommended).
 
 Installation
 ============
 
 Prerequisites:
 
-+ Python 2.7 or higher or 3.3 or higher
++ Python 2.7 or higher or 3.4 or higher
 
   * http://www.python.org/
-  * 2.7 and 3.4 are primary test environments.
+  * 2.7 and 3.6 are primary test environments.
 
 + pip and setuptools
 
@@ -86,4 +89,4 @@ License
 Authors
 =======
 
-* Adam Karpierz <python@python.pl>
+* Adam Karpierz <adam@karpierz.net>

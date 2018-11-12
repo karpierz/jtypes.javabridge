@@ -16,7 +16,7 @@ import os
 import wx
 from jt import javabridge
 
-class EmptyApp(wx.App):  #<AK> was: wx.PySimpleApp
+class EmptyApp(wx.App):  # <AK> fix, was: wx.PySimpleApp
     def OnInit(self):
         javabridge.activate_awt()
 

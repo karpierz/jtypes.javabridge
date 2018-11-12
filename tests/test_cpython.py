@@ -10,7 +10,7 @@ All rights reserved.
 '''
 from __future__ import absolute_import
 import unittest
-import jt.javabridge as javabridge
+import javabridge
 
 class TestCPython(unittest.TestCase):
     def setUp(self):
@@ -19,6 +19,12 @@ class TestCPython(unittest.TestCase):
 
     def test_01_01_exec(self):
         self.cpython.execute("pass")
+        # <AK> added
+        with self.assertRaisesRegex(javabridge.JavaException, "Script was null"):
+            self.cpython.execute(None)
+        with self.assertRaisesRegex(javabridge.JavaException, "Python exception at"):
+            self.cpython.execute("invalid syntax")
+        # </AK>
         
     def test_01_02_locals(self):
         jlocals = javabridge.JClassWrapper('java.util.HashMap')()
@@ -27,9 +33,9 @@ class TestCPython(unittest.TestCase):
         jlocals.put("denominator", "2")
         code = """
 global javabridge
-import jt.javabridge as javabridge
+import javabridge
 def fn(numerator, denominator, answer):
-    result = int(numerator) // int(denominator)  #<AK> was: /
+    result = int(numerator) // int(denominator)  # <AK> was: /
     javabridge.call(answer, "add", "(Ljava/lang/Object;)Z", str(result))
 fn(numerator, denominator, answer)
 """
@@ -46,9 +52,9 @@ fn(numerator, denominator, answer)
         jglobals.put("answer", jref.o)
         self.cpython.execute("""
 global javabridge
-import jt.javabridge as javabridge
+import javabridge
 def fn():
-    result = int(numerator) // int(denominator)  #<AK> was: /
+    result = int(numerator) // int(denominator)  # <AK> was: /
     javabridge.call(answer, "add", "(Ljava/lang/Object;)Z", str(result))
 fn()
 """, None, jglobals.o)
@@ -64,9 +70,9 @@ fn()
         # The import will be added to "locals", but that will be the globals.
         #
         self.cpython.execute("""
-import jt.javabridge as javabridge
+import javabridge
 def fn():
-    result = int(numerator) // int(denominator)  #<AK> was: /
+    result = int(numerator) // int(denominator)  # <AK> was: /
     javabridge.call(answer, "add", "(Ljava/lang/Object;)Z", str(result))
 fn()
 """, jglobals.o, jglobals.o)

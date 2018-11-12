@@ -1,5 +1,5 @@
-For jtypes.javabridge developers
-================================
+For *jtypes.javabridge* developers
+====================================
 
 Build from git repository
 -------------------------

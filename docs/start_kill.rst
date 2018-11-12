@@ -12,7 +12,7 @@ API
 .. py:data:: jt.javabridge.JARS
 
    a list of strings; gives the full path to some JAR files that should be added
-   to the class path in order for all the features of the jtypes.javabridge
+   to the class path in order for all the features of the *jtypes.javabridge*
    to work properly.
 
 .. autofunction:: jt.javabridge.activate_awt
@@ -22,7 +22,7 @@ API
 Environment
 +++++++++++
 
-In order to use the jtypes.javabridge in a thread, you need to attach to the
+In order to use the *jtypes.javabridge* in a thread, you need to attach to the
 JVM's environment in that thread. In order for the garbage collector to be able
 to collect thread-local variables, it is also necessary to detach from the
 environment before the thread ends.
@@ -130,4 +130,3 @@ wxPython for GUI on the Python side::
     finally:
 
         javabridge.kill_vm()
-

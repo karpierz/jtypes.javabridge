@@ -9,6 +9,5 @@ header = \
 """
 
 if __name__ == "__main__":
-
     import sys
     class2py(sys.argv[1], header=header)

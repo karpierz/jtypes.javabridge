@@ -6,7 +6,8 @@ from __future__ import absolute_import, print_function
 
 import unittest
 import sys
-import os.path
+import os
+import importlib
 import logging
 
 from . import test_dir
@@ -14,7 +15,7 @@ from . import test_dir
 test_java = os.path.join(test_dir, "java")
 
 
-def test_suite(names=None, omit=("runtests",)):
+def test_suite(names=None, omit=("run",)):
 
     from . import __name__ as pkg_name
     from . import __path__ as pkg_path
@@ -28,27 +29,27 @@ def test_suite(names=None, omit=("runtests",)):
     return tests
 
 
-def runTest():
+def main():
 
-    import jt.javabridge as jb
+    sys.modules["javabridge"]           = importlib.import_module("jt.javabridge")
+    sys.modules["javabridge.__about__"] = importlib.import_module("jt.javabridge.__about__")
+    sys.modules["javabridge.jutil"]     = importlib.import_module("jt.javabridge.jutil")
+    sys.modules["javabridge.locate"]    = importlib.import_module("jt.javabridge.locate")
+    sys.modules["javabridge.wrappers"]  = importlib.import_module("jt.javabridge.wrappers")
 
     print("Running testsuite", "\n", file=sys.stderr)
 
-    jb.start_vm(class_path=[os.path.join(test_java, "classes")] + jb.JARS)
-    try:
+    import javabridge as jb
+
+    with jb.vm(class_path=[os.path.join(test_java, "classes")] + jb.JARS,
+               max_heap_size="512M"):
         tests = test_suite(sys.argv[1:] or None)
         result = unittest.TextTestRunner(verbosity=2).run(tests)
-    finally:
-        jb.kill_vm()
 
     sys.exit(0 if result.wasSuccessful() else 1)
 
 
-def main():
-
+if __name__.rpartition(".")[-1] == "__main__":
     # logging.basicConfig(level=logging.INFO)
     # logging.basicConfig(level=logging.DEBUG)
-    runTest()
-
-
-main()
+    main()

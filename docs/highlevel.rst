@@ -11,8 +11,8 @@ a mid-level compromise between ease of use and performance.
 Signatures
 ----------
 
-jtypes.javabridge uses method signatures when it uses the JNI method lookup APIs.
-The method signatures are also used to convert between Python and Java
+*jtypes.javabridge* uses method signatures when it uses the JNI method lookup
+APIs. The method signatures are also used to convert between Python and Java
 primitives and objects. If you use the high-level API, as opposed to scripting,
 you will need to learn how to construct a signature for a class method.
 For example, java.lang.String has the following three methods:
@@ -72,10 +72,10 @@ Wrapping Java objects using reflection
 
 Operations on Java objects
 --------------------------
-.. autofunction:: jt.javabridge.make_call
-.. autofunction:: jt.javabridge.make_static_call
 .. autofunction:: jt.javabridge.call
+.. autofunction:: jt.javabridge.make_call
 .. autofunction:: jt.javabridge.static_call
+.. autofunction:: jt.javabridge.make_static_call
 .. autofunction:: jt.javabridge.get_field
 .. autofunction:: jt.javabridge.set_field
 .. autofunction:: jt.javabridge.get_static_field
@@ -91,6 +91,7 @@ The functions ``make_new`` and ``make_method`` create Python methods that wrap
 Java constructors and methods, respectively. The function can be used to create
 Python wrapper classes for Java classes. Example::
 
+    >>> from jt import javabridge
     >>> class Integer:
             new_fn = javabridge.make_new("java/lang/Integer", "(I)V")
             def __init__(self, i):

@@ -3,10 +3,10 @@ Executing JavaScript on the JVM
 
 As you will see in subsequent sections, navigating and manipulating
 the JVM's class and object structure can result in verbose and
-cumbersome Python code. Therefore, jtypes.javabridge ships with the
-JavaScript interpreter Rhino, which runs on the JVM. In many cases,
-the most convienient way to interact with the JVM is to execute a
-piece of JavaScript.
+cumbersome Python code. Therefore, *jtypes.javabridge* ships with
+the JavaScript interpreter Rhino, which runs on the JVM.
+In many cases, the most convienient way to interact with the JVM is
+to execute a piece of JavaScript.
 
 .. autofunction:: jt.javabridge.run_script
 
@@ -15,6 +15,7 @@ https://developer.mozilla.org/en-US/docs/Rhino/Scripting_Java
 
 Examples:
 
+    >>> from jt import javabridge
     >>> javabridge.run_script("2 + 2")
     4
 

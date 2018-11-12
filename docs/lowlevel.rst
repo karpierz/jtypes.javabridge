@@ -18,6 +18,7 @@ In order to get the environment:
 .. autofunction:: jt.javabridge.get_env
 
 Examples::
+    >>> from jt.javabridge import get_env
     >>> env = get_env()
     >>> s = env.new_string(u"Hello, world.")
     >>> c = env.get_object_class(s)
@@ -120,4 +121,3 @@ Examples::
    
 .. autoclass:: jt.javabridge.JB_Object
    :members:
-   

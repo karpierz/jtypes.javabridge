@@ -6,7 +6,7 @@ Install using pip
 
 ::
    
-    python -m pip install numpy
+    python -m pip install numpy  # not mandatory but highly recommended
     python -m pip install jtypes.javabridge
 
 
@@ -15,15 +15,16 @@ Install without pip
 
 ::
    
-    # Make sure numpy is installed
+    # Make sure numpy is installed (not mandatory but highly recommended)
     python setup.py install
 
 
 Dependencies
 ------------
 
-The jtypes.javabridge requires Python 2.7 or above, NumPy,
-the Java Development Kit (JDK) (a C compiler is not required).
+The *jtypes.javabridge* requires Python 2.7 or above, NumPy (not mandatory but
+highly recommended) and the Java Runtime Environment (JRE) (a C compiler is not
+required).
 
 Linux
 ^^^^^
@@ -68,29 +69,33 @@ MacOS X
    want to clutter up your system-wide python installation with new
    packages.
 
-3. ``python -m pip install numpy``
+3. ``python -m pip install numpy``  # not mandatory but highly recommended
 
 4. ``python -m pip install jtypes.javabridge``
-   
+
 Windows
 ^^^^^^^
 
-If you do not have a C compiler installed, you can install the Windows
-SDK 7.1 and .Net Framework 4.0 to perform the compile steps.
+If you do not have a C compiler installed, you can install Microsoft Visual
+C++ Build Tools to perform the compile steps. The compiler installation
+can be found in https://visualstudio.microsoft.com/visual-cpp-build-tools/.
 
 You should install a Java Development Kit (JDK) appropriate for your
 Java project. The Windows build is tested with the Oracle JDK 1.7. You
 also need to install the Java Runtime Environment (JRE).  Note that
 the bitness needs to match your python: if you use a 32-bit Python,
-then you need a 32-bit JDK; if you use a 64-bit Python, then you need
-a 64-bit JDK.
+then you need a 32-bit JRE; if you use a 64-bit Python, then you need
+a 64-bit JRE.
 
 The paths to PIP and Python should be in your PATH (``set
 PATH=%PATH%;c:\\Python27;c:\\Python27\\scripts`` if Python and PIP
 installed to the default locations). The following steps should
 perform the install:
 
-1. Issue the commands::
+1. Run Command Prompt as administrator.
+   Set the path to Python and PIP if needed.
+    
+2. Issue the command::
     
         python -m pip install jtypes.javabridge
 
@@ -113,8 +118,7 @@ You must build the extensions in-place on Windows, then run tests
 if you use setup to run the tests::
 
     python setup.py build_ext -i
-    python setup.py nosetests
+    python setup.py tests
 
 See the section :ref:`unit-testing` for how to run unit tests for your
-own projects that use jtypes.javabridge.
-
+own projects that use *jtypes.javabridge*.

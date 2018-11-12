@@ -13,20 +13,60 @@ from __future__ import absolute_import
 __version__="$Revision$"
 
 import os
-import numpy as np
 import unittest
+from collections import namedtuple
+# <AK> was:
+# import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None
 
-import jt.javabridge as javabridge
+import javabridge
 jb = javabridge
+
+# <AK> added
+from functools import partial
+from jt.javabridge.__config__ import config
+skipIfNumpyNotEnabled = partial(unittest.skipIf,
+    not config.getboolean("NUMPY_ENABLED", True) or not np,
+    'Numpy support is off or numpy is not available')
+# </AK>
 
 
 class TestJavabridge(unittest.TestCase):
 
     def setUp(self):
         self.env = javabridge.attach()
+        # <AK> added (temporary!!!)
+        if 0:#self.env.exception_occurred():
+            import sys
+            from jt import jni
+            print("\n@@ setUp", self.env.exception_occurred(), file=sys.stderr)
+            self.env.exception_describe()
+            print("@@ jni.Throwable.last", jni.Throwable.last, file=sys.stderr)
+            #self.env.exception_clear()
+            print("@@ /setUp", self.env.exception_occurred(),  file=sys.stderr)
+        # </AK>
+        self.env.exception_clear()  # <AK> added (temporary!!!)
 
     def tearDown(self):
         javabridge.detach()
+
+    def test_00_01_jvm(self):
+        # <AK> added
+        save_JAVA_HOME = os.environ.get("JAVA_HOME")
+        try:
+            os.environ["JAVA_HOME"] = "non existent"
+            with self.assertRaisesRegex(javabridge.JVMNotFoundError,
+                                        "Can't find the Java Virtual Machine"):
+                javabridge.start_vm()
+        finally:
+            if save_JAVA_HOME is not None: os.environ["JAVA_HOME"] = save_JAVA_HOME
+
+    def test_00_02_version(self):
+        # <AK> added
+        self.assertTrue(repr(self.env).startswith("<JB_Env at 0x"))
 
     def test_01_01_version(self):
         major,minor = self.env.get_version()
@@ -34,10 +74,19 @@ class TestJavabridge(unittest.TestCase):
     def test_01_02_find_class(self):
         string_class = self.env.find_class('java/lang/String')
         self.assertTrue(isinstance(string_class, jb.JB_Class))
+        # <AK> added
+        self.assertTrue(repr(string_class).startswith("<Java class at 0x"))
 
     def test_01_03_00_new_string_utf(self):
         jstring = self.env.new_string_utf("Hello, world")
         self.assertTrue(isinstance(jstring, jb.JB_Object))
+        # <AK> added
+        rjstring = repr(jstring)
+        self.assertTrue(rjstring.startswith("<Java object at 0x"))
+        self.assertEqual(jstring.addr(),
+                         str(int(rjstring.rpartition("<Java object at ")[2].partition(">")[0],
+                                 base=16)))
+        # </AK>
         
     def test_01_03_01_new_string_unicode(self):
         s = u"Hola ni\u00F1os"
@@ -76,11 +125,22 @@ class TestJavabridge(unittest.TestCase):
         klass = self.env.find_class("java/lang/String")
         method_id = self.env.get_method_id(klass,'charAt','(I)C')
         self.assertTrue(method_id is not None)
+        # <AK> added
+        method_id = self.env.get_method_id(klass, 'charAt', '')
+        self.assertTrue(method_id is None)
+        with self.assertRaisesRegex(ValueError,
+                                    "Class = None on call to get_method_id"):
+            method_id = self.env.get_method_id(None, 'charAt', '(I)C')
+        # </AK>
         
     def test_01_10_get_static_method_id(self):
         klass = self.env.find_class("java/lang/String")
         method_id = self.env.get_static_method_id(klass, 'copyValueOf','([C)Ljava/lang/String;')
         self.assertTrue(method_id is not None)
+        # <AK> added
+        method_id = self.env.get_static_method_id(klass, 'copyValueOf', '')
+        self.assertTrue(method_id is None)
+        # </AK>
         
     def test_01_11_new_object(self):
         klass = self.env.find_class("java/lang/Byte")
@@ -94,6 +154,8 @@ class TestJavabridge(unittest.TestCase):
         jbyte = self.env.new_object(klassByte, method_id, self.env.new_string_utf("55"))
         klassNumber = self.env.find_class("java/lang/Number")
         self.assertTrue(self.env.is_instance_of(jbyte, klassNumber))
+        # <AK> added
+        self.assertTrue(javabridge.is_instance_of(jbyte, "java/lang/Number"))
         
     def test_01_11_02_isnt_instance_of(self):
         klassByte = self.env.find_class("java/lang/Byte")
@@ -101,6 +163,8 @@ class TestJavabridge(unittest.TestCase):
         jbyte = self.env.new_object(klassByte, method_id, self.env.new_string_utf("55"))
         klassString = self.env.find_class("java/lang/String")
         self.assertFalse(self.env.is_instance_of(jbyte, klassString))
+        # <AK> added
+        self.assertFalse(javabridge.is_instance_of(None, "java/lang/String"))
     
     def test_01_12_get_static_field_id(self):
         klass = self.env.find_class("java/lang/Boolean")
@@ -120,7 +184,8 @@ class TestJavabridge(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(self.env.get_string_utf(result[0]), "Hello")
         self.assertEqual(self.env.get_string_utf(result[1]), "world")
-        
+
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_15_make_byte_array(self):
         array = np.array([ord(x) for x in "Hello, world"],np.uint8)
         jarray = self.env.make_byte_array(array)
@@ -128,6 +193,11 @@ class TestJavabridge(unittest.TestCase):
         method_id = self.env.get_method_id(klass, '<init>', '([B)V')
         result = self.env.new_object(klass, method_id, jarray)
         self.assertEqual(self.env.get_string_utf(result), "Hello, world")
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate byte array of size -1"):
+            jarray = self.env.make_byte_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
         
     def test_01_16_get_array_length(self):
         jstring = self.env.new_string_utf("Hello, world")
@@ -142,6 +212,11 @@ class TestJavabridge(unittest.TestCase):
         jarray = self.env.make_object_array(15, klass)
         length = self.env.get_array_length(jarray)
         self.assertEqual(length, 15)
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate object array of size -1"):
+            jarray = self.env.make_object_array(-1, klass)
+        # </AK>
         
     def test_01_18_set_object_array_element(self):
         klass = self.env.find_class("java/lang/String")
@@ -155,13 +230,20 @@ class TestJavabridge(unittest.TestCase):
             v = self.env.get_string_utf(elem)
             self.assertEqual(str(i), v)
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_19_0_make_boolean_array(self):
         np.random.seed(1190)
         array = np.random.uniform(size=105) > .5
         jarray = self.env.make_boolean_array(array)
         result = self.env.get_boolean_array_elements(jarray)
         self.assertTrue(np.all(array == result))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate boolean array of size -1"):
+            jarray = self.env.make_boolean_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_19_make_short_array(self):
         np.random.seed(119)
         array = (np.random.uniform(size=10) * 65535 - 32768).astype(np.int16)
@@ -174,7 +256,13 @@ class TestJavabridge(unittest.TestCase):
         for i, value in enumerate(array):
             self.assertEqual(i, self.env.call_static_method(
                 klass, method_id, jarray, array[i]))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate short array of size -1"):
+            jarray = self.env.make_short_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_20_make_int_array(self):
         np.random.seed(120)
         array = (np.random.uniform(size=10) * (2.0 ** 32-1) - (2.0 ** 31)).astype(np.int32)
@@ -187,7 +275,13 @@ class TestJavabridge(unittest.TestCase):
         for i, value in enumerate(array):
             self.assertEqual(i, self.env.call_static_method(
                 klass, method_id, jarray, array[i]))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate int array of size -1"):
+            jarray = self.env.make_int_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_21_make_long_array(self):
         np.random.seed(121)
         array = (np.random.uniform(size=10) * (2.0 ** 64) - (2.0 ** 63)).astype(np.int64)
@@ -200,7 +294,13 @@ class TestJavabridge(unittest.TestCase):
         for i, value in enumerate(array):
             self.assertEqual(i, self.env.call_static_method(
                 klass, method_id, jarray, array[i]))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate long array of size -1"):
+            jarray = self.env.make_long_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_22_make_float_array(self):
         np.random.seed(122)
         array = np.random.uniform(size=10).astype(np.float32)
@@ -213,7 +313,13 @@ class TestJavabridge(unittest.TestCase):
         for i, value in enumerate(array):
             self.assertEqual(i, self.env.call_static_method(
                 klass, method_id, jarray, array[i]))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate float array of size -1"):
+            jarray = self.env.make_float_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_23_make_double_array(self):
         np.random.seed(123)
         array = np.random.uniform(size=10).astype(np.float64)
@@ -226,7 +332,13 @@ class TestJavabridge(unittest.TestCase):
         for i, value in enumerate(array):
             self.assertEqual(i, self.env.call_static_method(
                 klass, method_id, jarray, array[i]))
+        # <AK> added
+        with self.assertRaisesRegex(MemoryError,
+                                    "Failed to allocate double array of size -1"):
+            jarray = self.env.make_double_array(namedtuple("fake_ndarray", ("shape",))((-1,)))
+        # </AK>
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_24_get_short_array_elements(self):
         np.random.seed(124)
         array = (np.random.uniform(size=10) * 65535 - 32768).astype(np.int16)
@@ -234,6 +346,7 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.get_short_array_elements(jarray)
         self.assertTrue(np.all(array == result))
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_25_get_int_array_elements(self):
         np.random.seed(125)
         array = (np.random.uniform(size=10) * (2.0 ** 32-1) - (2.0 ** 31)).astype(np.int32)
@@ -241,6 +354,7 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.get_int_array_elements(jarray)
         self.assertTrue(np.all(array == result))
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_26_get_long_array_elements(self):
         np.random.seed(126)
         array = (np.random.uniform(size=10) * (2.0 ** 64) - (2.0 ** 63)).astype(np.int64)
@@ -248,6 +362,7 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.get_long_array_elements(jarray)
         self.assertTrue(np.all(array == result))
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_27_get_float_array_elements(self):
         np.random.seed(127)
         array = np.random.uniform(size=10).astype(np.float32)
@@ -255,6 +370,7 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.get_float_array_elements(jarray)
         self.assertTrue(np.all(array == result))
             
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_01_28_get_double_array_elements(self):
         np.random.seed(128)
         array = np.random.uniform(size=10).astype(np.float64)
@@ -274,6 +390,20 @@ class TestJavabridge(unittest.TestCase):
         self.env.exception_clear()
         self.assertTrue(self.env.exception_occurred() is None)
         
+    def test_03_00_call_method(self):
+        # <AK> added
+        klass = self.env.find_class("java/lang/Byte")
+        ctor_id = self.env.get_method_id(klass, '<init>','(Ljava/lang/String;)V')
+        jbyte = self.env.new_object(klass, ctor_id, self.env.new_string_utf("55"))
+        with self.assertRaisesRegex(ValueError,
+                                    "Method ID is None - check your method ID call"):
+            self.env.call_method(jbyte, None)
+        method_id = self.env.get_static_method_id(klass, 'compare','(BB)I')
+        with self.assertRaisesRegex(ValueError,
+                                    "call_method called with a static method. "
+                                    "Use call_static_method instead"):
+            self.env.call_method(jbyte, method_id)
+        
     def test_03_01_call_method_char(self):
         jstring = self.env.new_string_utf("Hello, world")
         klass = self.env.get_object_class(jstring)
@@ -288,6 +418,10 @@ class TestJavabridge(unittest.TestCase):
         method_id = self.env.get_method_id(klass, 'equals', '(Ljava/lang/Object;)Z')
         self.assertTrue(self.env.call_method(jstring, method_id, jstring))
         self.assertFalse(self.env.call_method(jstring, method_id, self.env.new_string_utf("Foo")))
+        # <AK> added
+        with self.assertRaisesRegex(ValueError, "Method ID is None"):
+            self.env.call_method(jstring, None, jstring)
+        # </AK>
         
     def test_03_03_call_method_byte(self):
         klass = self.env.find_class("java/lang/Byte")
@@ -331,6 +465,7 @@ class TestJavabridge(unittest.TestCase):
         method_id = self.env.get_method_id(klass, 'doubleValue','()D')
         self.assertAlmostEqual(self.env.call_method(jdouble, method_id), -55.64)
         
+    @skipIfNumpyNotEnabled()  # <AK> added
     def test_03_09_call_method_array(self):
         s = "Hello, world"
         jstring = self.env.new_string_utf(s)
@@ -349,6 +484,18 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.call_method(hello, method_id, world)
         self.assertEqual("Hello, world", self.env.get_string_utf(result))
     
+    def test_04_00_call_static(self):
+        # <AK> added
+        klass = self.env.find_class("java/lang/Byte")
+        with self.assertRaisesRegex(ValueError,
+                                    "Method ID is None - check your method ID call"):
+            self.env.call_static_method(klass, None)
+        method_id = self.env.get_method_id(klass, 'byteValue','()B')
+        with self.assertRaisesRegex(ValueError,
+                                    "call_static_method called with an object method. " 
+                                    "Use call_method instead"):
+            self.env.call_static_method(klass, method_id)
+
     def test_04_01_call_static_bool(self):
         klass = self.env.find_class("java/lang/Boolean")
         method_id = self.env.get_static_method_id(klass, "parseBoolean",'(Ljava/lang/String;)Z')
@@ -357,6 +504,10 @@ class TestJavabridge(unittest.TestCase):
             klass, method_id, self.env.new_string_utf("false")))
         self.assertTrue(self.env.call_static_method(
             klass, method_id, self.env.new_string_utf("true")))
+        # <AK> added
+        with self.assertRaisesRegex(ValueError, "Method ID is None"):
+            self.env.call_static_method(klass, None, self.env.new_string_utf("true"))
+        # </AK>
 
     def test_04_02_call_static_byte(self):
         klass = self.env.find_class("java/lang/Byte")
@@ -461,3 +612,11 @@ class TestJavabridge(unittest.TestCase):
         result = self.env.get_static_double_field(klass, field_id)
         self.assertAlmostEqual(result, 3.141592653589793)
         
+    def test_06_01_class_as_object(self):
+        klass_map = self.env.find_class("java/util/Map")
+        klass_map_obj = klass_map.as_class_object()
+        klass_klass = self.env.find_class("java/lang/Class")
+        method_getname = self.env.get_method_id(
+            klass_klass, "getName", "()Ljava/lang/String;")
+        jstring = self.env.call_method(klass_map_obj, method_getname)
+        self.assertEqual(self.env.get_string_utf(jstring), "java.util.Map")
