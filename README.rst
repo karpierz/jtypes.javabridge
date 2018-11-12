@@ -11,7 +11,7 @@ Overview
   | **jtypes.javabridge** is a bridge between Python and Java, allowing these to intercommunicate.
   | It is an effort to allow python programs full access to Java class libraries.
 
-  `PyPI record <https://pypi.python.org/pypi/jtypes.javabridge>`__.
+  `PyPI record`_.
 
   | **jtypes.javabridge** is a lightweight Python package, based on the *ctypes* or *cffi* library.
   | It is an almost fully compliant implementation of Lee Kamentsky's and Vebjorn Ljosa's
@@ -21,7 +21,7 @@ Overview
 About javabridge:
 -----------------
 
-Borrowed from the `original website <http://pythonhosted.org/javabridge/>`__:
+Borrowed from the `original website`_:
 
   | The **javabridge** Python package makes it easy to start a Java virtual
     machine (JVM) from Python and interact with it. Python code can interact
@@ -59,11 +59,11 @@ To ensure everything is running correctly you can run the tests using::
 Development
 ===========
 
-Visit `development page <https://github.com/karpierz/jtypes.javabridge>`__
+Visit `development page`_
 
 Installation from sources:
 
-Clone the `sources <https://github.com/karpierz/jtypes.javabridge>`__ and run::
+Clone the `sources`_ and run::
 
     python -m pip install ./jtypes.javabridge
 
@@ -90,3 +90,8 @@ Authors
 =======
 
 * Adam Karpierz <adam@karpierz.net>
+
+.. _PyPI record: https://pypi.python.org/pypi/jtypes.javabridge
+.. _original website: http://pythonhosted.org/javabridge
+.. _development page: https://github.com/karpierz/jtypes.javabridge
+.. _sources: https://github.com/karpierz/jtypes.javabridge

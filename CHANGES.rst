@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.0.18b2 (2018-11-08)
---------------------
+1.0.18b3 (2018-11-08)
+---------------------
 - Update of the required setuptools version.
 - Minor setup and tests improvements.
 

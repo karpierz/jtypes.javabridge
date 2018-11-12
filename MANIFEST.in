@@ -4,19 +4,27 @@ include LICENSE
 include tox.ini
 
 graft src
-exclude src/jt/javabridge/_java/class2py.py
-#exclude src/jt/javabridge/jutil.py
-#exclude src/jt/javabridge/wrappers.py
-#prune   src/jt/javabridge/_platform
-#prune   src/jt/javabridge/_java/org/cellprofiler/javabridge
-#prune   src/jt/javabridge/_java/org/cellprofiler/runnablequeue
+exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/*.c
+exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython.java
+exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython.py
+exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython_StackFrame.py
+exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython_WrappedException.py
+exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue.java
+exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue.py
+exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue_1.py
+exclude src/jt/javabridge/_platform/_mac.py
+exclude src/jt/javabridge/_platform/_nomac.py
+exclude src/jt/javabridge/_platform/*.c
 
 graft docs
 prune docs/_build
+recursive-exclude docs *.org *.old *.new
 
 graft demo
 
 graft tests
+exclude tests/_info_.txt
+recursive-exclude tests *.org *.old *.new
 
 global-exclude .build .build.*
 global-exclude *.py[co] __pycache__
