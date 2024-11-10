@@ -11,10 +11,9 @@ All rights reserved.
 
 """
 
-from __future__ import absolute_import, print_function
 import os
 from jt import javabridge
 
 with javabridge.vm(run_headless=True):
-    print(javabridge.run_script('java.lang.String.format("Hello, %s!", greetee);', 
+    print(javabridge.run_script('java.lang.String.format("Hello, %s!", greetee);',
                                 dict(greetee='world')))

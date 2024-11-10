@@ -11,7 +11,6 @@ All rights reserved.
 
 """
 
-from __future__ import absolute_import
 import wx
 from jt import javabridge
 
@@ -20,7 +19,7 @@ frame = wx.Frame(None)
 frame.Sizer = wx.BoxSizer(wx.HORIZONTAL)
 
 start_button = wx.Button(frame, label="Start VM")
-frame.Sizer.Add(start_button, 1, wx.ALIGN_CENTER_HORIZONTAL)
+frame.Sizer.Add(start_button, 1, wx.ALIGN_CENTER)
 def fn_start(event):
     javabridge.start_vm([])
     javabridge.activate_awt()
@@ -30,7 +29,7 @@ def fn_start(event):
 start_button.Bind(wx.EVT_BUTTON, fn_start)
 
 launch_button = wx.Button(frame, label="Launch AWT frame")
-frame.Sizer.Add(launch_button, 1, wx.ALIGN_CENTER_HORIZONTAL)
+frame.Sizer.Add(launch_button, 1, wx.ALIGN_CENTER)
 def fn_launch_frame(event):
     javabridge.execute_runnable_in_main_thread(javabridge.run_script("""
         new java.lang.Runnable() {
@@ -42,7 +41,7 @@ launch_button.Bind(wx.EVT_BUTTON, fn_launch_frame)
 launch_button.Enable(False)
 
 stop_button = wx.Button(frame, label="Stop VM")
-frame.Sizer.Add(stop_button, 1, wx.ALIGN_CENTER_HORIZONTAL)
+frame.Sizer.Add(stop_button, 1, wx.ALIGN_CENTER)
 def fn_stop(event):
     import threading
     def do_kill_vm():

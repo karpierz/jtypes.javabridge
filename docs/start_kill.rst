@@ -39,7 +39,7 @@ Using the JVM in headless mode is straighforward::
 
     import os
     from jt import javabridge
-    
+
     javabridge.start_vm(run_headless=True)
     try:
         print(javabridge.run_script('java.lang.String.format("Hello, %s!", greetee);',
@@ -106,7 +106,7 @@ wxPython for GUI on the Python side::
 
     javabridge.start_vm()
 
-    try: 
+    try:
         app = EmptyApp(False)
 
         frame = wx.Frame(None)

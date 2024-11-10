@@ -1,15 +1,11 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
-
-from __future__ import absolute_import
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
 import os, sys
 
-from ..jvm.lib import platform
+from jvm.lib import platform
 
 def is_mingw():
-
     # Note: if a matching gcc is available from the shell on Windows, its
     #       probably safe to assume the user is in an MINGW or MSYS or Cygwin
     #       environment, in which case he/she wants to compile with gcc for
@@ -38,20 +34,20 @@ def is_mingw():
             os.system(mingw32 + test) == 0 or os.system(mingw64 + test) == 0)
 
 is_linux = platform.is_linux
-is_mac   = platform.is_osx
+is_mac   = platform.is_macos
 is_win   = platform.is_windows
 is_win64 = (is_win and os.environ["PROCESSOR_ARCHITECTURE"] == "AMD64")
 is_msvc  = (is_win and sys.version_info >= (2,6,0))
 is_mingw = is_mingw()
 
 from ._platform import JVMFinder
-find_javahome       = lambda JVMFinder=JVMFinder: JVMFinder().find_javahome()
-find_jdk            = lambda JVMFinder=JVMFinder: JVMFinder().find_jdk()
-find_javac_cmd      = lambda JVMFinder=JVMFinder: JVMFinder().find_javac_cmd()
-find_jar_cmd        = lambda JVMFinder=JVMFinder: JVMFinder().find_jar_cmd()
-find_jre_bin_jdk_so = lambda JVMFinder=JVMFinder: JVMFinder().find_jre_bin_jdk_so()
+find_javahome       = lambda JVMFinder=JVMFinder: str(x) if (x := JVMFinder().find_javahome())  is not None else None
+find_jdk            = lambda JVMFinder=JVMFinder: str(x) if (x := JVMFinder().find_jdk())       is not None else None
+find_javac_cmd      = lambda JVMFinder=JVMFinder: str(x) if (x := JVMFinder().find_javac_cmd()) is not None else None
+find_jar_cmd        = lambda JVMFinder=JVMFinder: str(x) if (x := JVMFinder().find_jar_cmd())   is not None else None
+find_jre_bin_jdk_so = lambda JVMFinder=JVMFinder: map((lambda x: str(x) if x is not None else None),
+                                                      JVMFinder().find_jre_bin_jdk_so())
 del JVMFinder
 
-del os, sys
 del platform
-del absolute_import
+del os, sys

@@ -1,15 +1,11 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
-from __future__ import absolute_import
+import jni
 
-import traceback
-
-from .......           import jni
-from .......jvm.jframe import JFrame
-from .......jvm.jhost  import JHost
-from .......jvm.java   import throwJavaException
+from jvm.jframe import JFrame
+from jvm.jhost  import JHost
+from jvm.java   import throwJavaException
 
 from ......_jvm    import get_jvm
 from ......_jvm    import jni_enter, jni_exit
@@ -17,7 +13,7 @@ from ......_jenv   import JB_Env
 from ......_jclass import JB_Object
 
 
-# Class: com.jt.reflect.ProxyHandler
+# Class: org.jt.reflect.ProxyHandler
 
 # Method: native Object invoke(long target, Object proxy, java.lang.reflect.Method method, Object[] args);
 
@@ -34,10 +30,11 @@ def invoke(env, this,
             jni_enter(jenv)
             method, args = None, []
             try:
-                method = jt_jvm.JMethod(None, jmethod, borrowed=True) if jmethod else None
+                method = jt_jvm.JMethod(None, jmethod, own=False) if jmethod else None
                 env = JB_Env()
                 env.env = jenv
-                args = env.get_object_array_elements(env._make_jb_object(jt_jvm.JObject(None, jargs, borrowed=True))) if jargs else []
+                args = env.get_object_array_elements(env._make_jb_object(
+                       jt_jvm.JObject(None, jargs, own=False))) if jargs else []
 
                 result = proxy(method, *args)
 
@@ -51,8 +48,9 @@ def invoke(env, this,
                 del method, args
                 jni_exit()
     except Exception as exc:
+        import traceback
         traceback.print_exc()
-        throwJavaException(jenv, "java.lang.Error", "Python exception: {}".format(exc))
+        throwJavaException(jenv, "java.lang.Error", f"Python exception: {exc}")
 
     return None
 

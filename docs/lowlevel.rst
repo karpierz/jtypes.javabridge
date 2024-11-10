@@ -1,8 +1,9 @@
 The low-level API
 =================
 
-This API wraps the Java Native Interface (JNI) at the lowest level.
-It provides primitives for creating an environment and making calls on it.
+This API wraps the Java Native Interface (JNI) at the lowest level. It
+provides primitives for creating an environment and making calls on
+it.
 
 Java array objects are handled as numpy arrays.
 
@@ -23,33 +24,33 @@ Examples::
     >>> s = env.new_string(u"Hello, world.")
     >>> c = env.get_object_class(s)
     >>> method_id = env.get_method_id(c, "length", "()I")
-    >>> method_id
-    <Java method with sig=()I at 0xa0a4fd0>
+    >>> repr(method_id)[:31]
+    '<Java method with sig=()I at 0x'
     >>> result = env.call_method(s, method_id)
     >>> result
     13
-    
+
 .. autoclass:: jt.javabridge.JB_Env
 
    .. automethod:: jt.javabridge.JB_Env.get_version()
-   
+
    .. line-block:: **Class discovery**
-   
+
    .. automethod:: jt.javabridge.JB_Env.find_class(name)
    .. automethod:: jt.javabridge.JB_Env.get_object_class(o)
    .. automethod:: jt.javabridge.JB_Env.is_instance_of(o, c)
-   
+
    .. line-block:: **Calling Java object and class (static) methods:**
-   
+
    .. automethod:: jt.javabridge.JB_Env.get_method_id(c, name, sig)
    .. automethod:: jt.javabridge.JB_Env.get_static_method_id(c, name, sig)
    .. automethod:: jt.javabridge.JB_Env.from_reflected_method(method, sig, is_static)
    .. automethod:: jt.javabridge.JB_Env.new_object(c, m, \*args)
    .. automethod:: jt.javabridge.JB_Env.call_method(o, m, \*args)
    .. automethod:: jt.javabridge.JB_Env.call_static_method(c, m, \*args)
-   
+
    .. line-block:: **Accessing Java object and class (static) fields:**
-   
+
    .. automethod:: jt.javabridge.JB_Env.get_field_id(c, name, sig)
    .. automethod:: jt.javabridge.JB_Env.get_static_field_id(c, name, sig)
    .. automethod:: jt.javabridge.JB_Env.get_static_object_field
@@ -86,14 +87,14 @@ Examples::
    .. automethod:: jt.javabridge.JB_Env.set_double_field
 
    .. line-block:: **String functions**
-   
+
    .. automethod:: jt.javabridge.JB_Env.new_string(u)
    .. automethod:: jt.javabridge.JB_Env.new_string_utf(s)
    .. automethod:: jt.javabridge.JB_Env.get_string(s)
    .. automethod:: jt.javabridge.JB_Env.get_string_utf(s)
 
-   .. line-block:: **Array functions**   
-   
+   .. line-block:: **Array functions**
+
    .. automethod:: jt.javabridge.JB_Env.get_array_length(array)
    .. automethod:: jt.javabridge.JB_Env.get_boolean_array_elements(array)
    .. automethod:: jt.javabridge.JB_Env.get_byte_array_elements(array)
@@ -114,10 +115,10 @@ Examples::
    .. automethod:: jt.javabridge.JB_Env.set_object_array_element(jbo, index, v)
 
    .. line-block:: **Exception handling**
-   
+
    .. automethod:: jt.javabridge.JB_Env.exception_occurred()
    .. automethod:: jt.javabridge.JB_Env.exception_describe()
-   .. automethod:: jt.javabridge.JB_Env.exception_clear()   
-   
+   .. automethod:: jt.javabridge.JB_Env.exception_clear()
+
 .. autoclass:: jt.javabridge.JB_Object
    :members:

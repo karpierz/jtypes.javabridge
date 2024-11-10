@@ -1,21 +1,20 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
-from __future__ import absolute_import
+from typing import Union, Optional, Tuple, List
+import ctypes as ct
 
 try:
     import numpy as np
 except ImportError:  # pragma: no cover
     np = None
-unicode = type(u"")
 
-from ..jvm.lib import annotate, Union, Optional
-from ..jvm.lib import public
-from ..        import jni
+import jni
+from jvm.lib import public
 
-from ..jvm.jframe  import JFrame
-from ..jvm.jstring import JString
+from jvm.jframe  import JFrame
+from jvm.jstring import JString
+from jvm._util   import str2jchars
 
 from ._jvm    import get_jvm
 from ._jclass import JB_Class, JB_Object, _JB_MethodID, _JB_FieldID
@@ -28,47 +27,35 @@ from ._jclass import JB_Class, JB_Object, _JB_MethodID, _JB_FieldID
 
 
 @public
-class JB_Env(object):
+class JB_Env:
 
-    """
-    Represents the Java VM and the Java execution environment.
-
-    """
+    """Represents the Java VM and the Java execution environment."""
 
     def __new__(cls):
-
-        self = super(JB_Env, cls).__new__(cls)
+        self = super().__new__(cls)
         self.env = None  # jni.JNIEnv
         return self
 
     def __repr__(self):
-
         return "<JB_Env at {:#x}>".format(id(self.env))
 
-    @annotate(jenv=jni.JNIEnv)
-    def set_env(self, jenv):
-
+    def set_env(self, jenv: jni.JNIEnv):
         self.env = jenv
         if not self.env:
             raise ValueError("set_env called with non-environment capsule")
 
-    @annotate(jbobject=JB_Object)
-    def dealloc_jobject(self, jbobject):
-
+    def dealloc_jobject(self, jbobject: JB_Object):
         jobject = jbobject._jobject
         if jbobject.o:
             self.env.DeleteGlobalRef(jobject.handle)
         if jbobject:
-            jobject._borrowed = True
+            jobject._own = False
 
-    def get_version(self):
-
+    def get_version(self) -> Tuple[int, int]:
         version = self.env.GetVersion()
         return (int(version // 65536), version % 65536)
 
-    @annotate(JB_Class, name=Union[str, unicode])
-    def find_class(self, name):
-
+    def find_class(self, name: str) -> JB_Class:
         jvm  = get_jvm()
         jenv = self.env
 
@@ -79,9 +66,7 @@ class JB_Env(object):
         jbclass._jclass = jvm.JClass(jenv, jclass.handle)
         return jbclass
 
-    @annotate(JB_Class, jbobject=JB_Object)
-    def get_object_class(self, jbobject):
-
+    def get_object_class(self, jbobject: JB_Object) -> JB_Class:
         jvm  = get_jvm()
         jenv = self.env
 
@@ -92,59 +77,44 @@ class JB_Env(object):
         jbclass._jclass = jvm.JClass(jenv, jclass.handle)
         return jbclass
 
-    @annotate(bool, jbobject=JB_Object, jbclass=JB_Class)
-    def is_instance_of(self, jbobject, jbclass):
-
+    def is_instance_of(self, jbobject: JB_Object, jbclass: JB_Class) -> bool:
         jobject = jbobject._jobject
         jclass  = jbclass._jclass
         return jclass.isInstance(jobject)
 
-    def exception_occurred(self):
-
+    def exception_occurred(self) -> Optional[JB_Object]:
         jvm  = get_jvm()
         jenv = self.env
-
         with JFrame(jenv, 1):
             jth = jni.Throwable.last.getCause() if jni.Throwable.last else jni.obj(jni.jthrowable)
             jth = jvm.JObject(jenv, jth) if jth else None
         return self._make_jb_object(jth) if jth else None
 
     def exception_describe(self):
-
         self.env.ExceptionDescribe()
 
     def exception_clear(self):
-
         self.env.ExceptionClear()
 
-    @annotate(_JB_MethodID, jbclass=JB_Class, name=Union[str, unicode], sig=Union[str, unicode])
-    def get_method_id(self, jbclass, name, sig):
-
+    def get_method_id(self, jbclass: JB_Class, name: str, sig: str) ->_JB_MethodID:
         if jbclass is None:
             raise ValueError("Class = None on call to get_method_id")
-
         jcls = jbclass.c
-
         try:
             id = self.env.GetMethodID(jcls, name.encode("utf-8"), sig.encode("utf-8"))
         except jni.Throwable as exc:
             return None
         return _JB_MethodID(id, sig, False)
 
-    @annotate(_JB_MethodID, jbclass=JB_Class, name=Union[str, unicode], sig=Union[str, unicode])
-    def get_static_method_id(self, jbclass, name, sig):
-
+    def get_static_method_id(self, jbclass: JB_Class, name: str, sig: str) -> _JB_MethodID:
         jcls = jbclass.c
-
         try:
             id = self.env.GetStaticMethodID(jcls, name.encode("utf-8"), sig.encode("utf-8"))
         except jni.Throwable as exc:
             return None
         return _JB_MethodID(id, sig, True)
 
-    @annotate(_JB_MethodID, method=JB_Object, sig=bytes, is_static=bool)
-    def from_reflected_method(self, method, sig, is_static):
-
+    def from_reflected_method(self, method: JB_Object, sig: bytes, is_static: bool) -> _JB_MethodID:
         try:
             id = self.env.FromReflectedMethod(method.o)
         except jni.Throwable as exc:
@@ -153,8 +123,7 @@ class JB_Env(object):
             return None
         return _JB_MethodID(id, sig, is_static)
 
-    @annotate(jobject=JB_Object, meth=_JB_MethodID)
-    def call_method(self, jobject, meth, *args):
+    def call_method(self, jobject: JB_Object, meth: _JB_MethodID, *args) -> object:
 
         if meth is None:
             raise ValueError("Method ID is None - check your method ID call")
@@ -164,7 +133,7 @@ class JB_Env(object):
                              "Use call_static_method instead")
 
         if meth.sig[0] != '(' or ')' not in meth.sig:
-            raise ValueError("Bad function signature: {}".format(meth.sig))
+            raise ValueError(f"Bad function signature: {meth.sig}")
 
         arg_end = meth.sig.find(')')
         arg_sig = meth.sig[1:arg_end]
@@ -256,10 +225,9 @@ class JB_Env(object):
                 raise get_jvm().JavaException(exc)
 
         else:
-            raise ValueError("Unhandled return type. Signature = {}".format(meth.sig))
+            raise ValueError(f"Unhandled return type. Signature = {meth.sig}")
 
-    @annotate(jbclass=JB_Class, meth=_JB_MethodID)
-    def call_static_method(self, jbclass, meth, *args):
+    def call_static_method(self, jbclass: JB_Class, meth: _JB_MethodID, *args) -> object:
 
         if meth is None:
             raise ValueError("Method ID is None - check your method ID call")
@@ -269,7 +237,7 @@ class JB_Env(object):
                              "Use call_method instead")
 
         if meth.sig[0] != '(' or ')' not in meth.sig:
-            raise ValueError("Bad function signature: {}".format(meth.sig))
+            raise ValueError(f"Bad function signature: {meth.sig}")
 
         arg_end = meth.sig.find(')')
         arg_sig = meth.sig[1:arg_end]
@@ -361,299 +329,217 @@ class JB_Env(object):
                 raise get_jvm().JavaException(exc)
 
         else:
-            raise ValueError("Unhandled return type. Signature = {}".format(meth.sig))
+            raise ValueError(f"Unhandled return type. Signature = {meth.sig}")
 
-    @annotate(_JB_FieldID, jbclass=JB_Class, name=Union[str, unicode], sig=Union[str, unicode])
-    def get_field_id(self, jbclass, name, sig):
-
+    def get_field_id(self, jbclass: JB_Class, name: str, sig: str) -> _JB_FieldID:
         jcls = jbclass.c
-
         try:
             id = self.env.GetFieldID(jcls, name.encode("utf-8"), sig.encode("utf-8"))
         except jni.Throwable as exc:
             raise get_jvm().JavaException(exc)
         return _JB_FieldID(id, sig, False)
 
-    @annotate(_JB_FieldID, jbclass=JB_Class, name=Union[str, unicode], sig=Union[str, unicode])
-    def get_static_field_id(self, jbclass, name, sig):
-
+    def get_static_field_id(self, jbclass: JB_Class, name: str, sig: str) -> _JB_FieldID:
         jcls = jbclass.c
-
         try:
             id = self.env.GetStaticFieldID(jcls, name.encode("utf-8"), sig.encode("utf-8"))
         except jni.Throwable as exc:
             raise get_jvm().JavaException(exc)
         return _JB_FieldID(id, sig, True)  # !!! bylo False, chyba blad !!!
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_boolean_field(self, jbobject, field):
-
+    def get_boolean_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetBooleanField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_byte_field(self, jbobject, field):
-
+    def get_byte_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetByteField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_char_field(self, jbobject, field):
-
+    def get_char_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetCharField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_short_field(self, jbobject, field):
-
+    def get_short_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetShortField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_int_field(self, jbobject, field):
-
+    def get_int_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetIntField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_long_field(self, jbobject, field):
-
+    def get_long_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetLongField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_float_field(self, jbobject, field):
-
+    def get_float_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetFloatField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_double_field(self, jbobject, field):
-
+    def get_double_field(self, jbobject: JB_Object, field: _JB_FieldID):
         jenv = self.env
         this = jbobject._jobject
         return jenv.GetDoubleField(this.handle, field.id)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def get_object_field(self, jbobject, field):
-
+    def get_object_field(self, jbobject: JB_Object, field: _JB_FieldID) -> Optional[JB_Object]:
         jvm  = get_jvm()
         jenv = self.env
-
         this = jbobject._jobject
         with JFrame(jenv, 1):
             jobj = jenv.GetObjectField(this.handle, field.id)
             jobj = jvm.JObject(jenv, jobj) if jobj else None
         return self._make_jb_object(jobj) if jobj else None
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_boolean_field(self, jbobject, field, value):
-
+    def set_boolean_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetBooleanField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_byte_field(self, jbobject, field, value):
-
+    def set_byte_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetByteField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_char_field(self, jbobject, field, value):
-
+    def set_char_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         assert len(str(value)) > 0
         jenv = self.env
         this = jbobject._jobject
         jenv.SetCharField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_short_field(self, jbobject, field, value):
-
+    def set_short_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetShortField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_int_field(self, jbobject, field, value):
-
+    def set_int_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetIntField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_long_field(self, jbobject, field, value):
-
+    def set_long_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetLongField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_float_field(self, jbobject, field, value):
-
+    def set_float_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetFloatField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID)
-    def set_double_field(self, jbobject, field, value):
-
+    def set_double_field(self, jbobject: JB_Object, field: _JB_FieldID, value):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetDoubleField(this.handle, field.id, value)
 
-    @annotate(jbobject=JB_Object, field=_JB_FieldID, value=Optional[JB_Object])
-    def set_object_field(self, jbobject, field, value):
-
+    def set_object_field(self, jbobject: JB_Object, field: _JB_FieldID, value: Optional[JB_Object]):
         jenv = self.env
         this = jbobject._jobject
         jenv.SetObjectField(this.handle, field.id, value.o if value is not None else None)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_boolean_field(self, jbclass, field):
-
+    def get_static_boolean_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticBooleanField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_byte_field(self, jbclass, field):
-
+    def get_static_byte_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticByteField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_char_field(self, jbclass, field):
-
+    def get_static_char_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticCharField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_short_field(self, jbclass, field):
-
+    def get_static_short_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticShortField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_int_field(self, jbclass, field):
-
+    def get_static_int_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticIntField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_long_field(self, jbclass, field):
-
+    def get_static_long_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticLongField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_float_field(self, jbclass, field):
-
+    def get_static_float_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticFloatField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_double_field(self, jbclass, field):
-
+    def get_static_double_field(self, jbclass: JB_Class, field: _JB_FieldID):
         jenv = self.env
         jcls = jbclass.c
         return jenv.GetStaticDoubleField(jcls, field.id)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def get_static_object_field(self, jbclass, field):
-
+    def get_static_object_field(self, jbclass: JB_Class, field: _JB_FieldID) -> Optional[JB_Object]:
         jvm  = get_jvm()
         jenv = self.env
-
         jcls = jbclass.c
         with JFrame(jenv, 1):
             jobj = jenv.GetStaticObjectField(jcls, field.id)
             jobj = jvm.JObject(jenv, jobj) if jobj else None
         return self._make_jb_object(jobj) if jobj else None
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_boolean_field(self, jbclass, field, value):
-
+    def set_static_boolean_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticBooleanField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_byte_field(self, jbclass, field, value):
-
+    def set_static_byte_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticByteField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_char_field(self, jbclass, field, value):
-
+    def set_static_char_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         assert len(str(value)) > 0
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticCharField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_short_field(self, jbclass, field, value):
-
+    def set_static_short_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticShortField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_int_field(self, jbclass, field, value):
-
+    def set_static_int_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticIntField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_long_field(self, jbclass, field, value):
-
+    def set_static_long_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticLongField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_float_field(self, jbclass, field, value):
-
+    def set_static_float_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticFloatField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID)
-    def set_static_double_field(self, jbclass, field, value):
-
+    def set_static_double_field(self, jbclass: JB_Class, field: _JB_FieldID, value):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticDoubleField(jcls, field.id, value)
 
-    @annotate(jbclass=JB_Class, field=_JB_FieldID, value=Optional[JB_Object])
-    def set_static_object_field(self, jbclass, field, value):
-
+    def set_static_object_field(self, jbclass: JB_Class, field: _JB_FieldID, value: Optional[JB_Object]):
         jenv = self.env
         jcls = jbclass.c
         jenv.SetStaticObjectField(jcls, field.id, value.o if value is not None else None)
 
-    @annotate(jclass=JB_Class, meth=_JB_MethodID)
-    def new_object(self, jclass, meth, *args):
-
+    def new_object(self, jclass: JB_Class, meth: _JB_MethodID, *args) -> Optional[JB_Object]:
         if meth.sig[0] != '(' or ')' not in meth.sig:
-            raise ValueError("Bad function signature: {}".format(meth.sig))
+            raise ValueError(f"Bad function signature: {meth.sig}")
 
         arg_end = meth.sig.find(')')
         arg_sig = meth.sig[1:arg_end]
@@ -671,20 +557,13 @@ class JB_Env(object):
         except jni.Throwable as exc:
             raise get_jvm().JavaException(exc)
 
-    @annotate(u=unicode)
-    def new_string(self, u):
-
+    def new_string(self, u: str) -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
         with JFrame(jenv, 1):
             try:
-                import ctypes as ct
-
-                jchars = u.encode("utf-16")[jni.sizeof(jni.jchar):]  # skip byte-order mark
-                size = len(jchars) // jni.sizeof(jni.jchar) # - 1
-                jbuf = jni.cast(ct.c_char_p(jchars), jni.POINTER(jni.jchar))
-                jstr = jenv.NewString(jbuf, size)
+                jchars, size, jbuf = str2jchars(u)
+                jstr = jenv.NewString(jchars, size)
             except jni.Throwable:
                 raise MemoryError("Failed to allocate string")
             if not jstr:
@@ -692,12 +571,9 @@ class JB_Env(object):
             jstr = jvm.JObject(jenv, jstr)
         return self._make_jb_object(jstr)
 
-    @annotate(s=Union[str, unicode])
-    def new_string_utf(self, s):
-
+    def new_string_utf(self, s: str) -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
         with JFrame(jenv, 1):
             try:
                 jstr = jenv.NewStringUTF(s.encode("utf-8"))
@@ -708,121 +584,105 @@ class JB_Env(object):
             jstr = jvm.JObject(jenv, jstr)
         return self._make_jb_object(jstr)
 
-    @annotate(Optional[unicode], s=JB_Object)
-    def get_string(self, s):
-
+    def get_string(self, s: JB_Object) -> Optional[str]:
         jenv = self.env
         jstr = s.o
-        return JString(jenv, jstr, borrowed=True).str if jstr else None
+        return JString(jenv, jstr, own=False).str if jstr else None
 
-    @annotate(Optional[unicode], s=JB_Object)
-    def get_string_utf(self, s):
-
+    def get_string_utf(self, s: JB_Object) -> Optional[str]:
         jenv = self.env
         jstr = s.o
-        return JString(jenv, jstr, borrowed=True).str if jstr else None
+        return JString(jenv, jstr, own=False).str if jstr else None
 
-    @annotate(int, array=JB_Object)
-    def get_array_length(self, array):
-
+    def get_array_length(self, array: JB_Object) -> int:
         jenv = self.env
         jarr = array.o
         return jenv.GetArrayLength(jarr)
 
-    @annotate(array=JB_Object)
-    def get_boolean_array_elements(self, array):
-
+    def get_boolean_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.uint8, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.uint8)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetBooleanArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jboolean)))
-        return result.astype(np.bool8)
+        jenv.GetBooleanArrayRegion(jarr, 0, size,
+                                   jni.cast(addr.value, jni.POINTER(jni.jboolean)))
+        return result.astype(np.bool_)
 
-    @annotate(array=JB_Object)
-    def get_byte_array_elements(self, array):
-
+    def get_byte_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.ubyte, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.ubyte)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetByteArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jbyte)))
+        jenv.GetByteArrayRegion(jarr, 0, size,
+                                jni.cast(addr.value, jni.POINTER(jni.jbyte)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_short_array_elements(self, array):
-
+    def get_short_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.int16, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.int16)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetShortArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jshort)))
+        jenv.GetShortArrayRegion(jarr, 0, size,
+                                 jni.cast(addr.value, jni.POINTER(jni.jshort)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_int_array_elements(self, array):
-
+    def get_int_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.int32, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.int32)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetIntArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jint)))
+        jenv.GetIntArrayRegion(jarr, 0, size,
+                               jni.cast(addr.value, jni.POINTER(jni.jint)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_long_array_elements(self, array):
-
+    def get_long_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.int64, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.int64)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetLongArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jlong)))
+        jenv.GetLongArrayRegion(jarr, 0, size,
+                                jni.cast(addr.value, jni.POINTER(jni.jlong)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_float_array_elements(self, array):
-
+    def get_float_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.float32, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.float32)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetFloatArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jfloat)))
+        jenv.GetFloatArrayRegion(jarr, 0, size,
+                                 jni.cast(addr.value, jni.POINTER(jni.jfloat)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_double_array_elements(self, array):
-
+    def get_double_array_elements(self, array: JB_Object):
         # np.ndarray[dtype=np.float64, ndim=1, negative_indices=False, mode='c']
-
         jenv = self.env
         size = self.get_array_length(array)
         result = np.zeros(shape=(size,), dtype=np.float64)
+        addr = result.ctypes.data_as(ct.c_void_p)
         jarr = array.o
-        jenv.GetDoubleArrayRegion(jarr, 0, size, result.ctypes.data_as(jni.POINTER(jni.jdouble)))
+        jenv.GetDoubleArrayRegion(jarr, 0, size,
+                                  jni.cast(addr.value, jni.POINTER(jni.jdouble)))
         return result
 
-    @annotate(array=JB_Object)
-    def get_object_array_elements(self, array):
-
+    def get_object_array_elements(self, array: JB_Object) -> List[Optional[JB_Object]]:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = self.get_array_length(array)
         result = []
-        jarr = array.o
         with JFrame(jenv) as jfrm:
+            size = self.get_array_length(array)
+            jarr = array.o
             for ix in range(size):
                 if not (ix % 256): jfrm.reset(256)
                 jobj = jenv.GetObjectArrayElement(jarr, ix)
@@ -830,160 +690,150 @@ class JB_Env(object):
                 result.append(self._make_jb_object(jobj) if jobj else None)
         return result
 
-    @annotate(array="")
-    def make_boolean_array(self, array):
-
-        # np.ndarray[dtype=np.uint8, ndim=1, negative_indices=False, mode='c'] array = array.astype(np.bool8).astype(np.uint8)
-
+    def make_boolean_array(self,
+            array: "np.ndarray[dtype=np.uint8, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
+        # np.ndarray[dtype=np.uint8, ndim=1, negative_indices=False, mode='c'] array = array.astype(np.bool_).astype(np.uint8)
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewBooleanArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate boolean array of size {}".format(size))
-            jenv.SetBooleanArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jboolean)))
+                raise MemoryError(f"Failed to allocate boolean array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetBooleanArrayRegion(jarr, 0, size,
+                                       jni.cast(addr.value, jni.POINTER(jni.jboolean)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.ubyte, ndim=1, negative_indices=False, mode='c']")
-    def make_byte_array(self, array):
-
+    def make_byte_array(self,
+            array: "np.ndarray[dtype=np.ubyte, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewByteArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate byte array of size {}".format(size))
-            jenv.SetByteArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jbyte)))
+                raise MemoryError(f"Failed to allocate byte array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetByteArrayRegion(jarr, 0, size,
+                                    jni.cast(addr.value, jni.POINTER(jni.jbyte)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.int16, ndim=1, negative_indices=False, mode='c']")
-    def make_short_array(self, array):
-
+    def make_short_array(self,
+            array: "np.ndarray[dtype=np.int16, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewShortArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate short array of size {}".format(size))
-            jenv.SetShortArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jshort)))
+                raise MemoryError(f"Failed to allocate short array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetShortArrayRegion(jarr, 0, size,
+                                     jni.cast(addr.value, jni.POINTER(jni.jshort)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.int32, ndim=1, negative_indices=False, mode='c']")
-    def make_int_array(self, array):
-
+    def make_int_array(self,
+            array: "np.ndarray[dtype=np.int32, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewIntArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate int array of size {}".format(size))
-            jenv.SetIntArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jint)))
+                raise MemoryError(f"Failed to allocate int array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetIntArrayRegion(jarr, 0, size,
+                                   jni.cast(addr.value, jni.POINTER(jni.jint)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.int64, ndim=1, negative_indices=False, mode='c']")
-    def make_long_array(self, array):
-
+    def make_long_array(self,
+            array: "np.ndarray[dtype=np.int64, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewLongArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate long array of size {}".format(size))
-            jenv.SetLongArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jlong)))
+                raise MemoryError(f"Failed to allocate long array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetLongArrayRegion(jarr, 0, size,
+                                    jni.cast(addr.value, jni.POINTER(jni.jlong)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.float32, ndim=1, negative_indices=False, mode='c']")
-    def make_float_array(self, array):
-
+    def make_float_array(self,
+            array: "np.ndarray[dtype=np.float32, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewFloatArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate float array of size {}".format(size))
-            jenv.SetFloatArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jfloat)))
+                raise MemoryError(f"Failed to allocate float array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetFloatArrayRegion(jarr, 0, size,
+                                     jni.cast(addr.value, jni.POINTER(jni.jfloat)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(array="np.ndarray[dtype=np.float64, ndim=1, negative_indices=False, mode='c']")
-    def make_double_array(self, array):
-
+    def make_double_array(self,
+            array: "np.ndarray[dtype=np.float64, ndim=1, negative_indices=False, mode='c']") -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        size = array.shape[0]
         with JFrame(jenv, 1):
+            size = array.shape[0]
             try:
                 jarr = jenv.NewDoubleArray(size)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate double array of size {}".format(size))
-            jenv.SetDoubleArrayRegion(jarr, 0, size, array.ctypes.data_as(jni.POINTER(jni.jdouble)))
+                raise MemoryError(f"Failed to allocate double array of size {size}")
+            addr = array.ctypes.data_as(ct.c_void_p)
+            jenv.SetDoubleArrayRegion(jarr, 0, size,
+                                      jni.cast(addr.value, jni.POINTER(jni.jdouble)))
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(size=int, jclass=JB_Class)
-    def make_object_array(self, size, jclass):
-
+    def make_object_array(self, size: int, jclass: JB_Class) -> JB_Object:
         jvm  = get_jvm()
         jenv = self.env
-
-        jcls = jclass.c
         with JFrame(jenv, 1):
+            jcls = jclass.c
             try:
                 jarr = jenv.NewObjectArray(size, jcls)
             except jni.Throwable:
-                raise MemoryError("Failed to allocate object array of size {}".format(size))
+                raise MemoryError(f"Failed to allocate object array of size {size}")
             jarr = jvm.JObject(jenv, jarr)
         return self._make_jb_object(jarr)
 
-    @annotate(jobject=JB_Object, index=int, value=Optional[JB_Object])
-    def set_object_array_element(self, jobject, index, value):
-
+    def set_object_array_element(self, jobject: JB_Object, index: int, value: Optional[JB_Object]):
         jenv = self.env
         jenv.SetObjectArrayElement(jobject.o, index, value.o if value is not None else None)
 
-    @annotate(JB_Object, jobject='JObject')
-    def _make_jb_object(self, jobject):
-
+    def _make_jb_object(self, jobject: 'JObject') -> JB_Object:
         jbobject = JB_Object()
         jbobject._jobject = jobject
         return jbobject
 
     @staticmethod
     def _make_arguments(arg_sig, args):
-
         jvm = get_jvm()
-
         jargs = jvm.JArguments(len(args))
         sig = arg_sig
         for pos, arg in enumerate(args):
 
             if len(sig) == 0:
-                raise ValueError("# of arguments ({}) in call did not match "
-                                 "signature ({})".format(len(args), arg_sig))
+                raise ValueError(f"# of arguments ({len(args)}) in call "
+                                 f"did not match signature ({arg_sig})")
 
             if sig[0] == 'Z':
 
@@ -1040,19 +890,19 @@ class JB_Env(object):
                     jargs.setObject(pos, None)
 
                 else:
-                    raise ValueError("{} is not a Java object".format(str(arg)))
+                    raise ValueError(f"{str(arg)} is not a Java object")
 
                 if sig[0] == '[':
 
                     if len(sig) == 1:
-                        raise ValueError("Bad signature: {}".format(arg_sig))
+                        raise ValueError(f"Bad signature: {arg_sig}")
 
                     non_bracket_ind = 1
                     try:
                         while sig[non_bracket_ind] == '[':
                             non_bracket_ind += 1
                     except IndexError:
-                        raise ValueError("Bad signature: {}".format(arg_sig))
+                        raise ValueError(f"Bad signature: {arg_sig}")
                     if sig[non_bracket_ind] != 'L':
                         # An array of primitive type:
                         sig = sig[(non_bracket_ind + 1):]
@@ -1061,9 +911,9 @@ class JB_Env(object):
                 sig = sig[sig.find(';') + 1:]
 
             else:
-                raise ValueError("Unhandled signature: {}".format(arg_sig))
+                raise ValueError(f"Unhandled signature: {arg_sig}")
 
         if len(sig) > 0:
-            raise ValueError("Too few arguments ({}) for signature ({})".format(
-                             len(args), arg_sig))
+            raise ValueError(f"Too few arguments ({len(args)}) for signature ({arg_sig})")
+
         return jargs

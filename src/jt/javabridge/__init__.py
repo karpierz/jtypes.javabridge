@@ -1,15 +1,14 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
 from . import __config__ ; del __config__
-from .__about__ import * ; del __about__
+from .__about__ import * ; del __about__  # noqa
 
-from os import path
+import sys
+from pathlib import Path
 
 # We must dynamically find libjvm.so since its unlikely to be in the same place
 # as it was on the distribution on which javabridge was built.
-import sys
 if sys.platform.startswith("linux"):  # pragma: no cover
     from .locate import find_jre_bin_jdk_so
     _, jdk_so = find_jre_bin_jdk_so()
@@ -19,9 +18,10 @@ if sys.platform.startswith("linux"):  # pragma: no cover
         del ctypes
 
 # List of absolute paths to JAR files that are required for the Javabridge to work.
-jars_dir = path.join(path.dirname(__file__), "_java", "lib")
-JARS = [path.realpath(path.join(jars_dir, _)) for _ in ["rhino-1.7.8.jar"]]
-del jars_dir
+import jvm.java
+jars_dir = Path(jvm.java.__file__).parent/"lib"
+JARS = [str(jars_dir/_) for _ in ["rhino-engine-1.7.15.jar", "rhino-runtime-1.7.15.jar"]]
+del jvm, jars_dir
 
 from .jutil import start_vm, kill_vm, vm, activate_awt, deactivate_awt
 from .jutil import attach, detach, get_env
@@ -75,4 +75,4 @@ from ._jclass import JB_Class, JB_Object
 # JNI helpers.
 from ._jvm    import jni_enter, jni_exit, jvm_enter
 
-del path
+del sys, Path

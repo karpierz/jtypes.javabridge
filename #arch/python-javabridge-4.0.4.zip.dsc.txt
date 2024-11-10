@@ -1,0 +1,8 @@
+Url:       https://github.com/CellProfiler/python-javabridge/archive/refs/tags/v4.0.4.zip
+Url redir: https://codeload.github.com/CellProfiler/python-javabridge/zip/refs/tags/v4.0.4
+Completed: 2024-11-06 18:46:46
+File name: python-javabridge-4.0.4.zip
+File date: 2024-11-06 18:46:46
+File size: 2351955
+SHA256sum: 64F83A3E3F6732289410A6DA162521AAE0E0907F05274588E57A4D38A18B8753
+SHA1sum:   D47E7D218EE6C45ED9CBE120D09C391B15B32744

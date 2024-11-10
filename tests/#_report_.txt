@@ -1,0 +1,193 @@
+Running testsuite 
+
+test_01_01_exec (tests.test_cpython.TestCPython) ... Traceback (most recent call last):
+  File "D:\_DiskP_\PythonJava.INS\JTypes\jtypes.javabridge\src\jt\javabridge\_java\org\cellprofiler\javabridge\CPython.py", line 48, in execute
+    exec(compile(py_script, "<string>", "exec"), py_globals, py_locals)
+  File "<string>", line 1
+    invalid syntax
+                 ^
+SyntaxError: invalid syntax
+ok
+test_01_02_locals (tests.test_cpython.TestCPython) ... ok
+test_01_03_globals (tests.test_cpython.TestCPython) ... ok
+test_01_04_globals_equals_locals (tests.test_cpython.TestCPython) ... ok
+test_00_01_jvm (tests.test_javabridge.TestJavabridge) ... ok
+test_00_02_version (tests.test_javabridge.TestJavabridge) ... ok
+test_01_01_version (tests.test_javabridge.TestJavabridge) ... ok
+test_01_02_find_class (tests.test_javabridge.TestJavabridge) ... ok
+test_01_03_00_new_string_utf (tests.test_javabridge.TestJavabridge) ... ok
+test_01_03_01_new_string_unicode (tests.test_javabridge.TestJavabridge) ... ok
+test_01_03_02_new_string_string (tests.test_javabridge.TestJavabridge) ... ok
+test_01_03_03_new_string_zero_length (tests.test_javabridge.TestJavabridge) ... ok
+test_01_04_00_get_string_utf (tests.test_javabridge.TestJavabridge) ... ok
+test_01_04_01_get_string (tests.test_javabridge.TestJavabridge) ... ok
+test_01_05_get_object_class (tests.test_javabridge.TestJavabridge) ... ok
+test_01_06_deallocate_object (tests.test_javabridge.TestJavabridge) ... ok
+test_01_09_get_method_id (tests.test_javabridge.TestJavabridge) ... ok
+test_01_10_get_static_method_id (tests.test_javabridge.TestJavabridge) ... ok
+test_01_11_01_is_instance_of (tests.test_javabridge.TestJavabridge) ... ok
+test_01_11_02_isnt_instance_of (tests.test_javabridge.TestJavabridge) ... ok
+test_01_11_new_object (tests.test_javabridge.TestJavabridge) ... ok
+test_01_12_get_static_field_id (tests.test_javabridge.TestJavabridge) ... ok
+test_01_13_get_byte_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_14_get_object_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_15_make_byte_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_16_get_array_length (tests.test_javabridge.TestJavabridge) ... ok
+test_01_17_make_object_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_18_set_object_array_element (tests.test_javabridge.TestJavabridge) ... ok
+test_01_19_0_make_boolean_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_19_make_short_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_20_make_int_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_21_make_long_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_22_make_float_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_23_make_double_array (tests.test_javabridge.TestJavabridge) ... ok
+test_01_24_get_short_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_25_get_int_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_26_get_long_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_27_get_float_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_01_28_get_double_array_elements (tests.test_javabridge.TestJavabridge) ... ok
+test_02_01_exception_did_not_occur (tests.test_javabridge.TestJavabridge) ... ok
+test_02_02_exception_occurred (tests.test_javabridge.TestJavabridge) ... ok
+test_03_00_call_method (tests.test_javabridge.TestJavabridge) ... ok
+test_03_01_call_method_char (tests.test_javabridge.TestJavabridge) ... ok
+test_03_02_call_method_bool (tests.test_javabridge.TestJavabridge) ... ok
+test_03_03_call_method_byte (tests.test_javabridge.TestJavabridge) ... ok
+test_03_04_call_method_short (tests.test_javabridge.TestJavabridge) ... ok
+test_03_05_call_method_int (tests.test_javabridge.TestJavabridge) ... ok
+test_03_06_call_method_long (tests.test_javabridge.TestJavabridge) ... ok
+test_03_07_call_method_float (tests.test_javabridge.TestJavabridge) ... ok
+test_03_08_call_method_double (tests.test_javabridge.TestJavabridge) ... ok
+test_03_09_call_method_array (tests.test_javabridge.TestJavabridge) ... ok
+test_03_10_call_method_object (tests.test_javabridge.TestJavabridge) ... ok
+test_04_00_call_static (tests.test_javabridge.TestJavabridge) ... ok
+test_04_01_call_static_bool (tests.test_javabridge.TestJavabridge) ... ok
+test_04_02_call_static_byte (tests.test_javabridge.TestJavabridge) ... ok
+test_04_03_call_static_short (tests.test_javabridge.TestJavabridge) ... ok
+test_04_04_call_static_int (tests.test_javabridge.TestJavabridge) ... ok
+test_04_05_call_static_long (tests.test_javabridge.TestJavabridge) ... ok
+test_04_06_call_static_float (tests.test_javabridge.TestJavabridge) ... ok
+test_04_07_call_static_double (tests.test_javabridge.TestJavabridge) ... ok
+test_04_08_call_static_object (tests.test_javabridge.TestJavabridge) ... ok
+test_04_09_call_static_char (tests.test_javabridge.TestJavabridge) ... ok
+test_04_10_call_static_array (tests.test_javabridge.TestJavabridge) ... ok
+test_05_01_get_static_object_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_02_get_static_boolean_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_03_get_static_byte_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_04_get_static_short_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_05_get_static_int_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_06_get_static_long_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_07_get_static_float_field (tests.test_javabridge.TestJavabridge) ... ok
+test_05_08_get_static_double_field (tests.test_javabridge.TestJavabridge) ... ok
+test_06_01_class_as_object (tests.test_javabridge.TestJavabridge) ... ok
+test_01_01_to_string (tests.test_jutil.TestJutil) ... ok
+test_01_02_make_instance (tests.test_jutil.TestJutil) ... ok
+test_01_03_01_static_call (tests.test_jutil.TestJutil) ... ok
+test_01_03_call (tests.test_jutil.TestJutil) ... ok
+test_01_04_make_method (tests.test_jutil.TestJutil) ... ok
+test_01_05_00_get_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_05_01_no_field_for_get_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_05_02_no_class_for_get_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_05_03_set_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_05_04_no_field_for_set_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_05_05_no_class_for_set_static_field (tests.test_jutil.TestJutil) ... ok
+test_01_06_get_enumeration_wrapper (tests.test_jutil.TestJutil) ... ok
+test_01_07_get_dictionary_wrapper (tests.test_jutil.TestJutil) ... ok
+test_01_08_jenumeration_to_string_list (tests.test_jutil.TestJutil) ... ok
+test_01_09_jdictionary_to_string_dictionary (tests.test_jutil.TestJutil) ... ok
+test_01_10_make_new (tests.test_jutil.TestJutil) ... ok
+test_01_11_class_for_name (tests.test_jutil.TestJutil) ... ok
+test_02_01_access_object_across_environments (tests.test_jutil.TestJutil) ... ok
+test_02_02_delete_in_environment (tests.test_jutil.TestJutil) ... ok
+test_02_03_death_and_resurrection (tests.test_jutil.TestJutil)
+Put an object into another in Java, delete it in Python and recover it ... ok
+test_02_04_non_java_thread_deletes_it (tests.test_jutil.TestJutil)
+Delete a Java object on a not-Java thread ... ok
+test_03_01_cw_from_class (tests.test_jutil.TestJutil)
+Get a class wrapper from a class ... ok
+test_03_02_cw_from_string (tests.test_jutil.TestJutil)
+Get a class wrapper from a string ... ok
+test_03_03_cw_get_classes (tests.test_jutil.TestJutil) ... ok
+test_03_04_cw_get_annotation (tests.test_jutil.TestJutil) ... ok
+test_03_05_cw_get_annotations (tests.test_jutil.TestJutil) ... ok
+test_03_06_cw_get_constructors (tests.test_jutil.TestJutil) ... ok
+test_03_07_cw_get_fields (tests.test_jutil.TestJutil) ... ok
+test_03_08_cw_get_field (tests.test_jutil.TestJutil) ... ok
+test_03_09_cw_get_method (tests.test_jutil.TestJutil) ... ok
+test_03_10_cw_get_methods (tests.test_jutil.TestJutil) ... ok
+test_03_11_cw_get_constructor (tests.test_jutil.TestJutil) ... ok
+test_04_01_field_get (tests.test_jutil.TestJutil) ... ok
+test_04_02_field_name (tests.test_jutil.TestJutil) ... ok
+test_04_03_field_type (tests.test_jutil.TestJutil) ... ok
+test_04_04_field_modifiers (tests.test_jutil.TestJutil) ... ok
+test_05_01_run_script (tests.test_jutil.TestJutil) ... ok
+test_05_02_run_script_with_inputs (tests.test_jutil.TestJutil) ... ok
+test_05_03_run_script_with_outputs (tests.test_jutil.TestJutil) ... ok
+test_06_01_execute_asynch_main (tests.test_jutil.TestJutil) ... ok
+test_06_02_execute_synch_main (tests.test_jutil.TestJutil) ... ok
+test_06_03_future_main (tests.test_jutil.TestJutil) ... ok
+test_07_01_wrap_future (tests.test_jutil.TestJutil) ... ok
+test_07_02_cancel_future (tests.test_jutil.TestJutil) ... ok
+test_07_03_make_future_task_from_runnable (tests.test_jutil.TestJutil) ... ok
+test_07_04_make_future_task_from_callable (tests.test_jutil.TestJutil) ... ok
+test_08_01_wrap_collection (tests.test_jutil.TestJutil) ... ok
+test_08_02_add (tests.test_jutil.TestJutil) ... ok
+test_08_03_contains (tests.test_jutil.TestJutil) ... ok
+test_08_04_addAll (tests.test_jutil.TestJutil) ... ok
+test_08_05__add__ (tests.test_jutil.TestJutil) ... ok
+test_08_06__iadd__ (tests.test_jutil.TestJutil) ... ok
+test_08_07_contains_all (tests.test_jutil.TestJutil) ... ok
+test_08_08_remove (tests.test_jutil.TestJutil) ... ok
+test_08_09_removeAll (tests.test_jutil.TestJutil) ... ok
+test_08_10_retainAll (tests.test_jutil.TestJutil) ... ok
+test_08_11_toArray (tests.test_jutil.TestJutil) ... ok
+test_08_12_make_list (tests.test_jutil.TestJutil) ... ok
+test_08_13_addI (tests.test_jutil.TestJutil) ... ok
+test_08_14_addAllI (tests.test_jutil.TestJutil) ... ok
+test_08_15_indexOf (tests.test_jutil.TestJutil) ... ok
+test_08_16_get (tests.test_jutil.TestJutil) ... ok
+test_08_17_set (tests.test_jutil.TestJutil) ... ok
+test_08_18_subList (tests.test_jutil.TestJutil) ... ok
+test_08_19__getitem__ (tests.test_jutil.TestJutil) ... ok
+test_08_20__setitem__ (tests.test_jutil.TestJutil) ... ok
+test_08_21__delitem__ (tests.test_jutil.TestJutil) ... ok
+test_09_01_00_get_field (tests.test_jutil.TestJutil) ... ok
+test_09_02_get_field_no_such_field (tests.test_jutil.TestJutil) ... ok
+test_09_03_set_field (tests.test_jutil.TestJutil) ... ok
+test_09_04_set_field_no_such_field (tests.test_jutil.TestJutil) ... ok
+test_10_01_class_path (tests.test_jutil.TestJutil) ... ok
+test_10_01_iterate_java_on_non_iterator (tests.test_jutil.TestJutil) ... ok
+test_11_01_make_run_dictionary (tests.test_jutil.TestJutil) ... ok
+test_12_01_jref (tests.test_jutil.TestJutil) ... ok
+test_12_02_jref_lost (tests.test_jutil.TestJutil) ... ok
+test_12_03_jref_create_and_lock (tests.test_jutil.TestJutil) ... ok
+test_13_01_unicode_arg (tests.test_jutil.TestJutil) ... ok
+test_01_01_import_class (tests.test_wrappers.TestImportClass) ... ok
+test_01_01_init (tests.test_wrappers.TestJClassWrapper) ... ok
+test_01_02_field (tests.test_wrappers.TestJClassWrapper) ... ok
+test_02_03_static_call (tests.test_wrappers.TestJClassWrapper) ... ok
+test_02_04_static_call_varargs (tests.test_wrappers.TestJClassWrapper) ... ok
+test_02_05_constructor_varargs (tests.test_wrappers.TestJClassWrapper) ... ok
+test_01_01_get_len (tests.test_wrappers.TestJClassWrapper_Collection) ... ok
+test_01_02_iterate (tests.test_wrappers.TestJClassWrapper_Collection) ... ok
+test_01_03_get_index (tests.test_wrappers.TestJClassWrapper_Collection) ... ok
+test_01_04_set_index (tests.test_wrappers.TestJClassWrapper_Collection) ... ok
+test_01_01_int (tests.test_wrappers.TestJClassWrapper_Unboxing) ... ok
+test_01_02_float (tests.test_wrappers.TestJClassWrapper_Unboxing) ... ok
+test_01_03_str (tests.test_wrappers.TestJClassWrapper_Unboxing) ... ok
+test_01_01_init (tests.test_wrappers.TestJProxy) ... skipped 'jt.javabridge: crash!!!'
+test_01_02_runnable (tests.test_wrappers.TestJProxy) ... skipped 'jt.javabridge: crash!!!'
+test_01_03_runnable_class (tests.test_wrappers.TestJProxy) ... skipped 'jt.javabridge: crash!!!'
+test_01_04_args (tests.test_wrappers.TestJProxy) ... skipped 'jt.javabridge: crash!!!'
+test_01_05_return_value (tests.test_wrappers.TestJProxy) ... skipped 'jt.javabridge: crash!!!'
+test_01_01_init (tests.test_wrappers.TestJWrapper) ... ok
+test_01_02_call_noargs (tests.test_wrappers.TestJWrapper) ... ok
+test_01_03_call_args (tests.test_wrappers.TestJWrapper) ... ok
+test_01_04_call_varargs (tests.test_wrappers.TestJWrapper) ... ok
+test_02_01_get_field (tests.test_wrappers.TestJWrapper) ... ok
+test_02_02_set_field (tests.test_wrappers.TestJWrapper) ... ok
+
+----------------------------------------------------------------------
+Ran 174 tests in 3.136s
+
+OK (skipped=5)
+svn: 11995M

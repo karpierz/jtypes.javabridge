@@ -1,111 +1,110 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
-from __future__ import absolute_import
-
+from typing import Optional, Tuple
+from pathlib import Path
 import sys
 import os
-from os import path
 import re
 import logging
 
-from ...jvm.lib import cli, CalledProcessError
-from ...jvm.platform import _jvmfinder
+from jvm.lib import public
+from jvm.lib import run
+
+from jvm.platform import _jvmfinder
 
 logger = logging.getLogger(__name__)
 
 
+@public
 class JVMFinder(_jvmfinder.JVMFinder):
 
     def __init__(self, java_version=None):
-
-        super(JVMFinder, self).__init__(java_version)
+        super().__init__(java_version)
 
         self._methods = (
         )
 
-    def find_javahome(self):
-
+    def find_javahome(self) -> Optional[Path]:
         """Find JAVA_HOME if it doesn't exist"""
 
-        java_home = os.environ.get("JAVA_HOME")
+        if "CP_JAVA_HOME" in os.environ:
+            # Prefer CellProfiler's JAVA_HOME if it's set.
+            return Path(os.environ["CP_JAVA_HOME"])
+
+        java_home = self.get_java_home()
         if java_home is not None:
             return java_home
 
-        """
-        103c103
-        <    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        ---
-        >    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        """
         try:
             cmd = ("bash", "-c", "type -p java")
-            java_bin, _ = cli.cmd(*cmd)
-            java_bin = java_bin.strip().decode("utf-8")
+            java_bin = run(*cmd, text=True,
+                           stdout=run.PIPE, stderr=run.STDOUT).stdout.strip()
             cmd = ("readlink", "-f", java_bin)
-            java_dir, _ = cli.cmd(*cmd)
-            java_dir = java_dir.strip().decode("utf-8")
-        except CalledProcessError:
+            java_dir = Path(run(*cmd, text=True,
+                                stdout=run.PIPE, stderr=run.STDOUT).stdout.strip())
+        except run.CalledProcessError:
             raise Exception("Error finding javahome on linux: {}".format("".join(cmd)))
-        java_version_string, _ = cli.cmd("bash", "-c", "java -version")
+        java_version_string = run("bash", "-c", "java -version",
+                                  text=True, stdout=run.PIPE, stderr=run.STDOUT).stdout
         if re.search("^openjdk", java_version_string, re.MULTILINE) is not None:
-            jdk_dir = path.join(java_dir,"..","..","..")
+            pattern = 'openjdk version "([^"]+)"'
+            match = re.search(pattern, java_version_string, re.MULTILINE)
+            if not match:
+                raise RuntimeError("Failed to parse version from {}".format(
+                                   java_version_string))
+            version = match.groups()[0]
+            if version < "1.8":
+                jdk_dir = java_dir.parent.parent.parent
+            else:
+                jdk_dir = java_dir.parent.parent
         elif re.search("^java", java_version_string, re.MULTILINE) is not None:
-            jdk_dir = path.join(java_dir,"..","..")
+            jdk_dir = java_dir.parent.parent
         else:
             raise RuntimeError("Failed to determine JDK vendor. "
                                "OpenJDK and Oracle JDK are supported.")
-        return path.abspath(jdk_dir)
+        return jdk_dir.absolute()
 
-    def find_jdk(self):
-
+    def find_jdk(self) -> Optional[Path]:
         """Find the JDK under Linux"""
-
-        jdk_home = os.environ.get("JDK_HOME")
+        jdk_home = self.get_jdk_home()
         if jdk_home is not None:
             return jdk_home
-
-        jdk_home = self.find_javahome()
-        if jdk_home.endswith("jre") or jdk_home.endswith("jre/"):
+        jdk_home = str(self.find_javahome())
+        if jdk_home.endswith(("jre", "jre/")):
             jdk_home = jdk_home[:jdk_home.rfind("jre")]
-        return jdk_home
+        return Path(jdk_home)
 
-    def find_javac_cmd(self):
-
+    def find_javac_cmd(self) -> Path:
         """Find the javac executable"""
-
         # will be along path for other platforms
-        return "javac"
+        return Path("javac")
 
-    def find_jar_cmd(self):
-
+    def find_jar_cmd(self) -> Path:
         """Find the jar executable"""
-
         # will be along path for other platforms
-        return "jar"
+        return Path("jar")
 
-    def find_jre_bin_jdk_so(self):
-
+    def find_jre_bin_jdk_so(self) -> Tuple[Optional[Path], Optional[Path]]:
         """Finds the jre bin dir and the jdk shared library file"""
-
         java_home = self.find_javahome()
         if java_home is None:
             return (None, None)
         jre_bin = None
         for jre_home in (java_home,
-                         path.join(java_home, "jre"),
-                         path.join(java_home, "default-java")):
-            jre_bin     = path.join(jre_home, "bin")
-            jre_libexec = path.join(jre_home, "lib")
+                         java_home/"jre",
+                         java_home/"default-java",
+                         java_home/"default-runtime"):
+            jre_bin     = jre_home/"bin"
+            jre_libexec = jre_home/"lib"
             arches = ("amd64", "i386", "")
             lib_prefix = "lib"
             lib_suffix = ".so"
             for arch in arches:
                 for place_to_look in ("client", "server"):
-                    jvm_dir = path.join(jre_libexec, arch, place_to_look)
-                    jvm_so  = path.join(jvm_dir, lib_prefix + "jvm" + lib_suffix)
-                    if path.isfile(jvm_so):
+                    jvm_dir = jre_libexec/arch/place_to_look
+                    jvm_so  = jvm_dir/(lib_prefix + "jvm" + lib_suffix)
+                    if jvm_so.is_file():
                         return (jre_bin, jvm_so)
         else:
             return (jre_bin, None)

@@ -1,30 +1,21 @@
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
+
 include README.rst
 include CHANGES.rst
 include LICENSE
-include tox.ini
-
-graft src
-exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/*.c
-exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython.java
-exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython.py
-exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython_StackFrame.py
-exclude src/jt/javabridge/_java/org/cellprofiler/javabridge/CPython_WrappedException.py
-exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue.java
-exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue.py
-exclude src/jt/javabridge/_java/org/cellprofiler/runnablequeue/RunnableQueue_1.py
-exclude src/jt/javabridge/_platform/_mac.py
-exclude src/jt/javabridge/_platform/_nomac.py
-exclude src/jt/javabridge/_platform/*.c
+include pyproject.toml
+include .readthedocs.yml
 
 graft docs
-prune docs/_build
-recursive-exclude docs *.org *.old *.new
 
 graft demo
 
-graft tests
-exclude tests/_info_.txt
-recursive-exclude tests *.org *.old *.new
+graft src
+recursive-exclude src/jt/javabridge *.java
 
-global-exclude .build .build.*
-global-exclude *.py[co] __pycache__
+graft tests
+
+global-exclude \#* \#*/**
+global-exclude .build .build/** .build.* .build.*/**
+global-exclude *.py[cod] __pycache__

@@ -13,7 +13,6 @@ Copyright (c) 2009-2013 Broad Institute
 All rights reserved.
 
 """
-from __future__ import absolute_import
 from jt import javabridge
 import sys
 import traceback
@@ -48,7 +47,7 @@ def main(args):
             importClass(java.util.concurrent.CountDownLatch);
             importClass(java.awt.event.ActionListener);
             importClass(java.awt.event.WindowAdapter);
-            
+
             d = new Hashtable();
             signal = new CountDownLatch(1);
             d.put("signal", signal);
@@ -57,22 +56,22 @@ def main(args):
             contentPane = frame.getContentPane();
             layout = new SpringLayout();
             contentPane.setLayout(layout);
-            
+
             textField = new JTextField("'Hello, world.'", 60);
             d.put("textField", textField);
             contentPane.add(textField);
-            
+
             execButton = new JButton("Exec");
             contentPane.add(execButton);
-            
+
             evalButton = new JButton("Eval");
             contentPane.add(evalButton);
-            
+
             result = new JTextArea("None");
             scrollPane = new JScrollPane(result)
             contentPane.add(scrollPane);
             d.put("result", result);
-            
+
             //-----------------------------------------------------
             //
             // The layout is:
@@ -91,7 +90,7 @@ def main(args):
                                  5, SpringLayout.EAST, textField);
             layout.putConstraint(SpringLayout.NORTH, execButton,
                                  0, SpringLayout.NORTH, textField);
-                                 
+
             layout.putConstraint(SpringLayout.WEST, evalButton,
                                  5, SpringLayout.EAST, execButton);
             layout.putConstraint(SpringLayout.NORTH, evalButton,
@@ -103,12 +102,12 @@ def main(args):
                                  0, SpringLayout.WEST, textField);
             layout.putConstraint(SpringLayout.EAST, scrollPane,
                                  0, SpringLayout.EAST, evalButton);
-                                 
+
             layout.putConstraint(SpringLayout.EAST, contentPane,
                                  5, SpringLayout.EAST, evalButton);
             layout.putConstraint(SpringLayout.SOUTH, contentPane,
                                  20, SpringLayout.SOUTH, scrollPane);
-            
+
             //-----------------------------------------------
             //
             // Create an action listener that binds the execButton
@@ -154,11 +153,11 @@ def main(args):
                 }
             };
             evalButton.addActionListener(alEval);
-            
+
             //-----------------------------------------------
             //
             // Create a window listener that binds the frame's
-            // windowClosing action to a function that instructs 
+            // windowClosing action to a function that instructs
             // Python to exit.
             //
             //-----------------------------------------------
@@ -167,7 +166,7 @@ def main(args):
                     signal.countDown();
                 }
             };
-            
+
             frame.addWindowListener(wl);
 
             frame.pack();
@@ -181,7 +180,8 @@ def main(args):
     d = javabridge.get_map_wrapper(d)
     frame = javabridge.JWrapper(d["frame"])
     signal = javabridge.JWrapper(d["signal"]);
-    signal.await();
+    getattr(signal, "await")();  # <AK> fix, was: signal.await();
+                                 #      due to 'await' is a keyword now.
     frame.dispose();
 
 if __name__=="__main__":

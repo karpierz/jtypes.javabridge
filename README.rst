@@ -1,5 +1,3 @@
-**Currently only as placeholder (because a base package jtypes.jvm is still in development)**
-
 jtypes.javabridge
 =================
 
@@ -8,82 +6,99 @@ Python wrapper for the Java Native Interface.
 Overview
 ========
 
-  | **jtypes.javabridge** is a bridge between Python and Java, allowing these to intercommunicate.
-  | It is an effort to allow python programs full access to Java class libraries.
+The |package_bold| package makes it easy to start a Java virtual machine (JVM)
+from Python and interact with it. Python code can interact with the JVM using
+a low-level API or a more convenient high-level API.
 
-  `PyPI record`_.
+`PyPI record`_.
 
-  | **jtypes.javabridge** is a lightweight Python package, based on the *ctypes* or *cffi* library.
-  | It is an almost fully compliant implementation of Lee Kamentsky's and Vebjorn Ljosa's
-    **Javabridge** package by reimplementing whole its functionality in a clean Python instead of
-    Cython and C.
+`Documentation`_.
+
+| |package_bold| is an almost fully compliant implementation of Lee Kamentsky's
+  and Vebjorn Ljosa's good known **Javabridge** package by reimplementing whole
+  its functionality in a clean Python instead of Cython and C.
+| |package_bold| package is closely based on the `jvm`_ and `jni`_ Python packages.
 
 About javabridge:
 -----------------
 
 Borrowed from the `original website`_:
 
-  | The **javabridge** Python package makes it easy to start a Java virtual
-    machine (JVM) from Python and interact with it. Python code can interact
-    with the JVM using a low-level API or a more convenient high-level API.
+| The **javabridge** Python package makes it easy to start a Java virtual machine
+  (JVM) from Python and interact with it.
+| Python code can interact with the JVM using a low-level API or a more convenient
+  high-level API.
+
+The **javabridge** was developed for and is used by the cell image analysis
+software `CellProfiler <https://cellprofiler.org/>`_ together with
+`python-bioformats <https://github.com/CellProfiler/python-bioformats/>`_
+to interface to various Java code, including `Bio-Formats <https://loci.wisc.edu/
+software/bio-formats>`_ and `ImageJ <https://developer.imagej.net/>`_.
 
 Requirements
 ============
 
-- Java Runtime (JRE) or Java Development Kit (JDK), and NumPy (not mandatory but highly
-  recommended).
+- Java Runtime (JRE) or Java Development Kit (JDK), and NumPy (not mandatory but
+  highly recommended).
 
 Installation
 ============
 
 Prerequisites:
 
-+ Python 2.7 or higher or 3.4 or higher
++ Python 3.9 or higher
 
-  * http://www.python.org/
-  * 2.7 and 3.6 are primary test environments.
+  * https://www.python.org/
+  * Java 11 is a primary test environment.
 
 + pip and setuptools
 
-  * http://pypi.python.org/pypi/pip
-  * http://pypi.python.org/pypi/setuptools
+  * https://pypi.org/project/pip/
+  * https://pypi.org/project/setuptools/
 
-To install run::
+To install run:
 
-    python -m pip install --upgrade jtypes.javabridge
+  .. parsed-literal::
 
-To ensure everything is running correctly you can run the tests using::
-
-    python -m jt.javabridge.tests
+    python -m pip install --upgrade |package|
 
 Development
 ===========
-
-Visit `development page`_
-
-Installation from sources:
-
-Clone the `sources`_ and run::
-
-    python -m pip install ./jtypes.javabridge
-
-or on development mode::
-
-    python -m pip install --editable ./jtypes.javabridge
 
 Prerequisites:
 
 + Development is strictly based on *tox*. To install it run::
 
-    python -m pip install tox
+    python -m pip install --upgrade tox
+
+Visit `Development page`_.
+
+Installation from sources:
+
+clone the sources:
+
+  .. parsed-literal::
+
+    git clone |respository| |package|
+
+and run:
+
+  .. parsed-literal::
+
+    python -m pip install ./|package|
+
+or on development mode:
+
+  .. parsed-literal::
+
+    python -m pip install --editable ./|package|
 
 License
 =======
 
-  | Copyright (c) 2014-2018, Adam Karpierz
-  |
+  | |copyright|
   | Licensed under the BSD license
-  | http://opensource.org/licenses/BSD-3-Clause
+  | https://opensource.org/licenses/BSD-3-Clause
   | Please refer to the accompanying LICENSE file.
 
 Authors
@@ -91,7 +106,13 @@ Authors
 
 * Adam Karpierz <adam@karpierz.net>
 
-.. _PyPI record: https://pypi.python.org/pypi/jtypes.javabridge
-.. _original website: http://pythonhosted.org/javabridge
-.. _development page: https://github.com/karpierz/jtypes.javabridge
-.. _sources: https://github.com/karpierz/jtypes.javabridge
+.. |package| replace:: jtypes.javabridge
+.. |package_bold| replace:: **jtypes.javabridge**
+.. |copyright| replace:: Copyright (c) 2014-2024, Adam Karpierz
+.. |respository| replace:: https://github.com/karpierz/jtypes.javabridge.git
+.. _Development page: https://github.com/karpierz/jtypes.javabridge
+.. _PyPI record: https://pypi.org/project/jtypes.javabridge/
+.. _Documentation: https://jtypesjavabridge.readthedocs.io/
+.. _jvm: https://pypi.org/project/jvm/
+.. _jni: https://pypi.org/project/jni/
+.. _original website: https://pythonhosted.org/javabridge/

@@ -1,0 +1,5 @@
+Url: https://repo1.maven.org/maven2/junit/junit/4.13.1/junit-4.13.1.jar
+Completed: 2020-11-11 10:44:42
+File name: junit-4.13.1.jar
+File date: Sun, 11 Oct 2020 15:19:47 GMT
+File size: 382708

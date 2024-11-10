@@ -3,25 +3,25 @@
 High-level API
 ===============
 
-The high-level API can wrap a Java object or class so that its methods and
-fields can be referenced by dot syntax. It also has functions that offload
-some of the burden of exception handling and type conversion, thus providing
-a mid-level compromise between ease of use and performance.
+The high-level API can wrap a Java object or class so that its methods and fields
+can be referenced by dot syntax. It also has functions that offload some
+of the burden of exception handling and type conversion, thus providing a
+mid-level compromise between ease of use and performance.
 
 Signatures
 ----------
 
-*jtypes.javabridge* uses method signatures when it uses the JNI method lookup
-APIs. The method signatures are also used to convert between Python and Java
+*jtypes.javabridge* uses method signatures when it uses the JNI method lookup APIs.
+The method signatures are also used to convert between Python and Java
 primitives and objects. If you use the high-level API, as opposed to scripting,
-you will need to learn how to construct a signature for a class method.
-For example, java.lang.String has the following three methods:
+you will need to learn how to construct a signature for a class method. For example,
+java.lang.String has the following three methods:
 ::
 
     public char charAt(int index)
     public int indexOf(String str)
     public byte [] getString(String charsetName)
-    
+
 charAt has the signature, "(I)C", because it takes one integer argument (I) and
 its return value is a char (C).
 
@@ -32,11 +32,11 @@ getString has the signature, "(Ljava/lang/String;)[B. "[B" uses "[" to indicate
 that an array will be returned and "B" indicates that the array is of type, byte.
 
 The signature syntax is described in `JNI Types and Data Structures
-<http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html>`_.
+<https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html>`_.
 An example: “(ILjava/lang/String;)[I” takes an integer and string as parameters
-and returns an array of integers. 
+and returns an array of integers.
 
-Cheat sheet: 
+Cheat sheet:
 
 Z
    boolean

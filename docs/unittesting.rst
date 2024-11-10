@@ -15,11 +15,3 @@ You should then be able to run the ``tests`` module::
 On some installations, setuptools's test command will also work::
 
     python setup.py test
-
-If you prefer, these options can also be given on the command line::
-
-    nosetests --with-javabridge=True --classpath=my-project/jars/foo.jar
-
-or::
-
-    python setup.py nosetests --with-javabridge=True --classpath=my-project/jars/foo.jar

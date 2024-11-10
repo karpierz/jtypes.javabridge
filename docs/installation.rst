@@ -5,47 +5,37 @@ Install using pip
 -----------------
 
 ::
-   
-    python -m pip install numpy  # not mandatory but highly recommended
-    python -m pip install jtypes.javabridge
 
-
-Install without pip
--------------------
-
-::
-   
-    # Make sure numpy is installed (not mandatory but highly recommended)
-    python setup.py install
+    python -m pip install --upgrade jtypes.javabridge[numpy]  # with numpy - not mandatory but highly recommended
+    python -m pip install --upgrade jtypes.javabridge
 
 
 Dependencies
 ------------
 
-The *jtypes.javabridge* requires Python 2.7 or above, NumPy (not mandatory but
-highly recommended) and the Java Runtime Environment (JRE) (a C compiler is not
-required).
+The *jtypes.javabridge* requires Python 3.9 or above, NumPy (not mandatory
+but highly recommended) and the Java Runtime Environment (JRE).
 
 Linux
 ^^^^^
 
 On CentOS 6, the dependencies can be installed as follows::
 
-    yum install gcc numpy java-1.7.0-openjdk-devel
+    sudo yum install numpy java
     curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
     python get-pip.py
 
 On Fedora 19, the dependencies can be installed as follows::
 
-    yum install gcc numpy java-1.7.0-openjdk-devel python-pip openssl
+    sudo yum install numpy java python-pip openssl
 
-On Ubuntu 13, 14 and Debian 7, the dependencies can be installed as follows::
+On Ubuntu 14 and Debian 8, the dependencies can be installed as follows::
 
-   apt-get install openjdk-7-jdk python-pip python-numpy
+   sudo apt-get install default-jre python-pip python-numpy
 
 On Arch Linux, the dependencies can be installed as follows::
 
-   pacman -S jdk7-openjdk python2-pip python2-numpy base-devel
+   sudo pacman -S jre-openjdk python-pip python-numpy
 
 MacOS X
 ^^^^^^^
@@ -69,42 +59,34 @@ MacOS X
    want to clutter up your system-wide python installation with new
    packages.
 
-3. ``python -m pip install numpy``  # not mandatory but highly recommended
-
-4. ``python -m pip install jtypes.javabridge``
+3. ``python -m pip install --upgrade jtypes.javabridge[numpy]``  # with numpy - not mandatory but highly recommended
+   ``python -m pip install --upgrade jtypes.javabridge``
 
 Windows
 ^^^^^^^
 
-If you do not have a C compiler installed, you can install Microsoft Visual
-C++ Build Tools to perform the compile steps. The compiler installation
-can be found in https://visualstudio.microsoft.com/visual-cpp-build-tools/.
+You should install a Java Runtime Environment (JRE) or Java Development Kit
+(JDK) appropriate for your Java project. The Windows build is tested with the
+Oracle JRE/JDK 1.8. Note that the bitness needs to match your python: if you
+use a 32-bit Python, then you need a 32-bit JRE/JDK; if you use a 64-bit
+Python, then you need a 64-bit JRE/JDK.
 
-You should install a Java Development Kit (JDK) appropriate for your
-Java project. The Windows build is tested with the Oracle JDK 1.7. You
-also need to install the Java Runtime Environment (JRE).  Note that
-the bitness needs to match your python: if you use a 32-bit Python,
-then you need a 32-bit JRE; if you use a 64-bit Python, then you need
-a 64-bit JRE.
-
-The paths to PIP and Python should be in your PATH (``set
-PATH=%PATH%;c:\\Python27;c:\\Python27\\scripts`` if Python and PIP
-installed to the default locations). The following steps should
+The paths to PIP and Python should be in your PATH. The following steps should
 perform the install:
 
-1. Run Command Prompt as administrator.
-   Set the path to Python and PIP if needed.
-    
+1. Run Command Prompt as administrator. Set the path to Python and PIP if
+   needed, e.g. (if Python and PIP installed to the default locations)::
+
+        ``set PATH=%PATH%;c:\\Python312;c:\\Python312\\Scripts``
+
 2. Issue the command::
-    
-        python -m pip install jtypes.javabridge
+
+        python -m pip install --upgrade jtypes.javabridge[numpy]  # with numpy - not mandatory but highly recommended
+        python -m pip install --upgrade jtypes.javabridge
 
 
 Running the unit tests
 ----------------------
-
-Running the unit tests requires Nose. Some of the tests require Python 2.7
-or above.
 
 1. Build and install in the source code tree so that the unit tests can run::
 
@@ -118,7 +100,7 @@ You must build the extensions in-place on Windows, then run tests
 if you use setup to run the tests::
 
     python setup.py build_ext -i
-    python setup.py tests
+    python setup.py test
 
 See the section :ref:`unit-testing` for how to run unit tests for your
 own projects that use *jtypes.javabridge*.

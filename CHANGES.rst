@@ -1,10 +1,23 @@
 Changelog
 =========
 
+4.0.4b1 (2024-11-08)
+--------------------
+- Add support for Python 3.9, 3.10, 3.11, 3.12, 3.13
+- Drop support for Python 3.5, 3.6, 3.7, 3.8
+- Drop support for Python2.
+- Add support for PyPy 3.9 and 3.10
+- Synchro with javabridge master branch (v4.0.4).
+- General update, improvements and cleanup.
+- Update of Mozilla Rhino.
+- Copyright year update.
+- Setup update and improvements.
+
 1.0.18b3 (2018-11-08)
 ---------------------
 - Update of the required setuptools version.
 - Minor setup and tests improvements.
+- Last release for Python2.
 
 1.0.18b1 (2018-10-01)
 ---------------------

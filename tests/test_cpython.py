@@ -8,7 +8,6 @@ Copyright (c) 2009-2013 Broad Institute
 All rights reserved.
 
 '''
-from __future__ import absolute_import
 import unittest
 import javabridge
 
@@ -25,7 +24,7 @@ class TestCPython(unittest.TestCase):
         with self.assertRaisesRegex(javabridge.JavaException, "Python exception at"):
             self.cpython.execute("invalid syntax")
         # </AK>
-        
+
     def test_01_02_locals(self):
         jlocals = javabridge.JClassWrapper('java.util.HashMap')()
         jref = javabridge.JClassWrapper('java.util.ArrayList')()
@@ -43,7 +42,7 @@ fn(numerator, denominator, answer)
         jlocals.put("answer", jref.o)
         self.cpython.execute(code, jlocals.o, None)
         self.assertEqual(float(javabridge.to_string(jref.get(0))), 3)
-        
+
     def test_01_03_globals(self):
         jglobals = javabridge.JClassWrapper('java.util.HashMap')()
         jref = javabridge.JClassWrapper('java.util.ArrayList')()

@@ -28,7 +28,6 @@ Copyright (c) 2009-2013 Broad Institute
 All rights reserved.
 
 """
-from __future__ import absolute_import
 from jt import javabridge
 import sys
 import traceback
@@ -60,29 +59,29 @@ def main(args):
             importClass(java.awt.event.ActionListener);
             importClass(java.awt.event.WindowAdapter);
             importClass(java.util.concurrent.SynchronousQueue);
-            
+
             d = new Hashtable();
             frame = new JFrame("Callbacks in Java");
             d.put("frame", frame);
             contentPane = frame.getContentPane();
             layout = new SpringLayout();
             contentPane.setLayout(layout);
-            
+
             textField = new JTextField("'Hello, world.'", 60);
             d.put("textField", textField);
             contentPane.add(textField);
-            
+
             execButton = new JButton("Exec");
             contentPane.add(execButton);
-            
+
             evalButton = new JButton("Eval");
             contentPane.add(evalButton);
-            
+
             result = new JTextArea("None");
             scrollPane = new JScrollPane(result)
             contentPane.add(scrollPane);
             d.put("result", result);
-            
+
             //-----------------------------------------------------
             //
             // The layout is:
@@ -101,7 +100,7 @@ def main(args):
                                  5, SpringLayout.EAST, textField);
             layout.putConstraint(SpringLayout.NORTH, execButton,
                                  0, SpringLayout.NORTH, textField);
-                                 
+
             layout.putConstraint(SpringLayout.WEST, evalButton,
                                  5, SpringLayout.EAST, execButton);
             layout.putConstraint(SpringLayout.NORTH, evalButton,
@@ -113,12 +112,12 @@ def main(args):
                                  0, SpringLayout.WEST, textField);
             layout.putConstraint(SpringLayout.EAST, scrollPane,
                                  0, SpringLayout.EAST, evalButton);
-                                 
+
             layout.putConstraint(SpringLayout.EAST, contentPane,
                                  5, SpringLayout.EAST, evalButton);
             layout.putConstraint(SpringLayout.SOUTH, contentPane,
                                  20, SpringLayout.SOUTH, scrollPane);
-            
+
             //------------------------------------------------
             //
             // qUp sends messages from Java to Python
@@ -131,12 +130,12 @@ def main(args):
             // Python must dispose of Java
             //
             //-------------------------------------------------
-            
+
             qUp = new SynchronousQueue();
             qDown = new SynchronousQueue();
             d.put("qUp", qUp);
             d.put("qDown", qDown);
-            
+
             //-----------------------------------------------
             //
             // Create an action listener that binds the execButton
@@ -168,11 +167,11 @@ def main(args):
                 }
             };
             evalButton.addActionListener(alEval);
-            
+
             //-----------------------------------------------
             //
             // Create a window listener that binds the frame's
-            // windowClosing action to a function that instructs 
+            // windowClosing action to a function that instructs
             // Python to exit.
             //
             //-----------------------------------------------
@@ -181,7 +180,7 @@ def main(args):
                     qUp.put("Exit");
                 }
             };
-            
+
             frame.addWindowListener(wl);
 
             frame.pack();
@@ -216,8 +215,8 @@ def main(args):
                 result = "%s\n%s" % (str(e), traceback.format_exc())
             except:
                 result = "What happened?"
-            
-        javabridge.run_script("qDown.put(result);", 
+
+        javabridge.run_script("qDown.put(result);",
                               dict(qDown=qDown, result = str(result)))
     javabridge.run_script("frame.dispose();", dict(frame=frame))
 

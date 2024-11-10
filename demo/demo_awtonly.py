@@ -11,7 +11,6 @@ All rights reserved.
 
 """
 
-from __future__ import absolute_import
 import os
 import wx
 from jt import javabridge

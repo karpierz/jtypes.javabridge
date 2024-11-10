@@ -1,19 +1,18 @@
-# Copyright (c) 2014-2018, Adam Karpierz
-# Licensed under the BSD license
-# http://opensource.org/licenses/BSD-3-Clause
+# Copyright (c) 2014 Adam Karpierz
+# SPDX-License-Identifier: BSD-3-Clause
 
-from ...jvm.lib import platform
+from jvm.lib import platform
 
 if platform.is_windows:
-    from ._windows import JVMFinder
+    from ._windows import *  # noqa
 elif platform.is_linux:
-    from ._linux   import JVMFinder
-elif platform.is_osx:
-    from ._osx     import JVMFinder
+    from ._linux   import *  # noqa
+elif platform.is_macos:
+    from ._macos   import *  # noqa
 elif platform.is_android:
-    from ._android import JVMFinder
+    from ._android import *  # noqa
 elif platform.is_posix:
-    from ._linux   import JVMFinder
+    from ._linux   import *  # noqa
 else:
     raise ImportError("unsupported platform")
 

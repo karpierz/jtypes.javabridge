@@ -11,12 +11,11 @@ All rights reserved.
 
 """
 
-from __future__ import absolute_import
 import os
 import wx
 from jt import javabridge
 
-class EmptyApp(wx.App):  # <AK> fix, was: wx.PySimpleApp
+class EmptyApp(wx.App):  # <AK> fix, was: (wx.PySimpleApp):
     def OnInit(self):
         javabridge.activate_awt()
 
@@ -24,13 +23,13 @@ class EmptyApp(wx.App):  # <AK> fix, was: wx.PySimpleApp
 
 javabridge.start_vm()
 
-try: 
+try:
     app = EmptyApp(False)
 
     frame = wx.Frame(None)
     frame.Sizer = wx.BoxSizer(wx.HORIZONTAL)
     launch_button = wx.Button(frame, label="Launch AWT frame")
-    frame.Sizer.Add(launch_button, 1, wx.ALIGN_CENTER_HORIZONTAL)
+    frame.Sizer.Add(launch_button, 1, wx.ALIGN_CENTER)  # <AK> fix, was: wx.ALIGN_CENTER_HORIZONTAL
 
     def fn_launch_frame(event):
         javabridge.execute_runnable_in_main_thread(javabridge.run_script("""
